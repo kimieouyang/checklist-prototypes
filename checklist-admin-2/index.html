@@ -1,0 +1,2931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280, initial-scale=1">
+<title>Checklist QA — Sidebar Stepper + Adaptive Width</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   STENSUL DESIGN TOKENS
+   ============================================================ */
+:root {
+  --white: #ffffff;
+  --black: #000000;
+  --ivory-25: #fdfdfc;
+  --ivory-50: #f8f7f7;
+  --ivory-100: #f0eeed;
+  --ivory-200: #e4e1df;
+  --ivory-300: #d6d1cd;
+  --ivory-400: #a8a39f;
+  --ivory-500: #6b665e;
+  --ivory-600: #4a453f;
+  --ivory-700: #332f2a;
+  --ivory-800: #201f1d;
+  --ivory-900: #161514;
+  --teal-25: #efffff;
+  --teal-50: #e5ffff;
+  --teal-100: #d2ffff;
+  --teal-200: #c9feff;
+  --teal-300: #a1f1f5;
+  --teal-400: #6bd1d9;
+  --teal-500: #2ba6b0;
+  --teal-600: #0a7790;
+  --teal-700: #0c6677;
+  --teal-800: #0c505d;
+  --teal-900: #0d3b43;
+  --magenta-600: #71295c;
+  --citron-200: #fff966;
+  --error-25: #fff6f5;
+  --error-50: #f6d4d1;
+  --error-500: #c64337;
+  --error-600: #af3a2f;
+  --warning-25: #fffaf2;
+  --warning-50: #fbe9d0;
+  --warning-500: #d58e31;
+  --success-25: #f6fbf7;
+  --success-50: #d7eedb;
+  --success-100: #bfe4c4;
+  --success-400: #58b46b;
+  --success-500: #3a7d44;
+  --blue-25: #fbfcfc;
+  --blue-50: #f8f8fb;
+  --blue-100: #eaebf5;
+  --blue-500: #4e5aa6;
+  --blue-600: #3e4783;
+  --purple-50: #f5f3ff; --purple-100: #ede9fe; --purple-500: #7c3aed; --purple-600: #6d28d9;
+  --orange-50: #fff7ed; --orange-100: #ffedd5; --orange-500: #f97316; --orange-600: #ea580c;
+  --red-50: #fef2f2; --red-100: #fee2e2; --red-500: #ef4444; --red-600: #dc2626;
+  --green-50: #f0fdf4; --green-100: #dcfce7; --green-500: #22c55e; --green-600: #16a34a;
+  --indigo-50: #eef2ff; --indigo-100: #e0e7ff; --indigo-500: #6366f1; --indigo-600: #4f46e5;
+  --amber-50: #fffbeb; --amber-100: #fef3c7; --amber-500: #f59e0b; --amber-600: #d97706;
+  --sp-xxs: 2px;
+  --sp-xs: 4px;
+  --sp-sm: 6px;
+  --sp-md: 8px;
+  --sp-lg: 12px;
+  --sp-xl: 16px;
+  --sp-2xl: 20px;
+  --sp-3xl: 24px;
+  --sp-4xl: 32px;
+  --sp-5xl: 40px;
+  --sp-6xl: 48px;
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+  --r-full: 9999px;
+  --font-body: 'Inter', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font-body); color: var(--ivory-900); background: var(--white); -webkit-font-smoothing: antialiased; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: inherit; }
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+.top-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--sp-3xl); height: 56px;
+  background: var(--white); border-bottom: 1px solid var(--ivory-200); flex-shrink: 0;
+}
+.top-nav-left { display: flex; align-items: center; gap: var(--sp-4xl); }
+.top-nav-logo { display: flex; align-items: center; cursor: pointer; }
+.top-nav-items { display: flex; align-items: center; gap: var(--sp-md); }
+.top-nav-item {
+  display: flex; align-items: center; gap: var(--sp-md);
+  padding: var(--sp-md) var(--sp-xl); font-size: 13px; font-weight: 500; color: var(--ivory-600);
+  cursor: pointer; border-radius: var(--r-md); transition: all 0.2s; text-decoration: none;
+}
+.top-nav-item:hover { background: var(--ivory-100); color: var(--ivory-900); }
+.top-nav-item.active { color: #0C505D; }
+.top-nav-item svg { width: 18px; height: 18px; }
+.top-nav-right { display: flex; align-items: center; gap: var(--sp-xl); }
+.top-nav-tour-btn {
+  display: flex; align-items: center; gap: var(--sp-md);
+  padding: var(--sp-md) var(--sp-xl); font-size: 13px; font-weight: 500; color: var(--ivory-700);
+  background: var(--white); border: 1px solid var(--ivory-300); border-radius: var(--r-md); cursor: pointer;
+}
+.top-nav-help {
+  display: flex; align-items: center; gap: var(--sp-xs);
+  font-size: 13px; font-weight: 500; color: var(--ivory-600); cursor: pointer; text-decoration: none;
+}
+.top-nav-help svg { width: 18px; height: 18px; }
+.top-nav-user {
+  width: 32px; height: 32px; border-radius: var(--r-full);
+  background: #8B5CF6; color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 11px; cursor: pointer;
+}
+
+.body-wrap { display: flex; flex: 1; min-height: 0; background: var(--ivory-50); padding-left: var(--sp-4xl); }
+
+.sidebar {
+  width: 249px; flex-shrink: 0; background: var(--ivory-50);
+  border-right: 1px solid var(--ivory-200);
+  padding: var(--sp-3xl) var(--sp-xl) var(--sp-3xl) 0;
+  overflow-y: auto; display: flex; flex-direction: column; gap: var(--sp-xs);
+}
+.nav-section { margin-bottom: var(--sp-xs); }
+.nav-section-header {
+  display: flex; align-items: center; gap: var(--sp-lg); padding: var(--sp-md);
+  font-size: 16px; font-weight: 700; color: var(--ivory-600);
+}
+.nav-section-header svg { width: 24px; height: 24px; color: var(--ivory-500); }
+.nav-section-header .chevron { width: 20px; height: 20px; margin-left: auto; }
+.nav-sub-items { display: flex; flex-direction: column; gap: var(--sp-xs); }
+.nav-sub-item {
+  padding: var(--sp-md) var(--sp-md) var(--sp-md) 48px;
+  font-size: 14px; font-weight: 500; color: var(--ivory-600); border-radius: var(--r-sm); cursor: pointer;
+}
+.nav-sub-item:hover { background: var(--ivory-100); }
+.nav-sub-item.active { background: var(--ivory-200); color: var(--ivory-900); }
+.nav-item-single {
+  display: flex; align-items: center; gap: var(--sp-lg); padding: var(--sp-md);
+  font-size: 14px; font-weight: 700; color: var(--ivory-600); cursor: pointer; border-radius: var(--r-sm);
+}
+.nav-item-single svg { width: 24px; height: 24px; }
+.nav-item-single .chevron { width: 20px; height: 20px; margin-left: auto; }
+.nav-item-single:hover { background: var(--ivory-100); }
+
+.main-content { flex: 1; min-width: 0; background: var(--ivory-25); padding: 0 var(--sp-4xl) 0 var(--sp-3xl); display: flex; flex-direction: column; }
+.page-header { padding-top: var(--sp-3xl); padding-bottom: var(--sp-3xl); display: flex; justify-content: space-between; align-items: flex-start; }
+.page-title { font-size: 24px; font-weight: 500; color: var(--ivory-900); }
+.page-subtitle { font-size: 14px; font-weight: 400; color: var(--ivory-600); margin-top: var(--sp-xxs); }
+.content-area { flex: 1; min-height: 0; padding-bottom: var(--sp-4xl); }
+.page-section { margin-bottom: var(--sp-3xl); }
+.page-section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--sp-md); }
+.page-section-title { font-size: 16px; font-weight: 600; color: var(--ivory-800); letter-spacing: -0.01em; }
+.page-section-desc { font-size: 13px; color: var(--ivory-500); margin-top: 2px; }
+.page-section-count { font-size: 12px; font-weight: 500; color: var(--ivory-500); background: var(--ivory-100); padding: 2px 10px; border-radius: var(--r-full); }
+
+/* Empty state (compact) */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: var(--sp-2xl) var(--sp-lg); text-align: center; gap: var(--sp-md);
+  background: var(--white); border: 1px dashed var(--ivory-200); border-radius: var(--r-lg);
+}
+.empty-icon {
+  width: 44px; height: 44px; border-radius: var(--r-md);
+  background: var(--ivory-100); display: flex; align-items: center; justify-content: center;
+}
+.empty-icon svg { width: 22px; height: 22px; color: var(--ivory-400); }
+.empty-title { font-size: 15px; font-weight: 600; color: var(--ivory-800); }
+.empty-desc { font-size: 13px; color: var(--ivory-500); max-width: 380px; line-height: 19px; }
+
+/* List */
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.data-table th {
+  text-align: left; font-size: 12px; font-weight: 600; color: var(--ivory-500);
+  padding: var(--sp-lg) var(--sp-xl); border-bottom: 1px solid var(--ivory-200);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.data-table td {
+  padding: var(--sp-xl); font-size: 14px; color: var(--ivory-700);
+  border-bottom: 1px solid var(--ivory-100);
+}
+.data-table tr:hover td { background: var(--ivory-50); cursor: pointer; }
+.badge {
+  display: inline-flex; align-items: center; gap: var(--sp-xs);
+  padding: 2px 10px; border-radius: var(--r-full); font-size: 12px; font-weight: 500;
+}
+.badge-active { background: var(--success-50); color: var(--success-500); }
+.badge-active::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success-400); }
+.badge-draft { background: var(--ivory-100); color: var(--ivory-500); }
+.badge-blocker { background: var(--error-25); color: var(--error-500); padding: 2px 8px; font-size: 11px; }
+.badge-suggestion { background: var(--blue-50); color: var(--blue-500); padding: 2px 8px; font-size: 11px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-md);
+  padding: 10px 18px; border-radius: var(--r-md); font-size: 14px; font-weight: 600;
+  transition: all 0.15s ease;
+}
+.btn-primary { background: var(--teal-600); color: var(--white); }
+.btn-primary:hover { background: var(--teal-700); }
+.btn-primary:disabled { background: var(--ivory-200); color: var(--ivory-400); cursor: not-allowed; }
+.btn-secondary { background: var(--white); color: var(--ivory-700); border: 1px solid var(--ivory-200); }
+.btn-secondary:hover { background: var(--ivory-50); }
+.btn-ghost { color: var(--ivory-600); }
+.btn-ghost:hover { background: var(--ivory-100); }
+.btn-error { background: var(--error-500); color: var(--white); }
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+
+/* ============================================================
+   MODAL — SIDEBAR STEPPER + ADAPTIVE WIDTH
+   ============================================================ */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(22,21,20,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.modal-overlay.visible { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: var(--white); border-radius: var(--r-xl);
+  display: flex; flex-direction: row;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05);
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.25s ease;
+  overflow: hidden;
+}
+.modal-overlay.visible .modal { transform: translateY(0) scale(1); }
+
+/* Fixed width — always use the widest size */
+.modal { width: 1040px; height: 88vh; }
+
+/* --- Left: Stepper Sidebar --- */
+.modal-stepper-sidebar {
+  width: 200px; flex-shrink: 0;
+  background: var(--ivory-50);
+  border-right: 1px solid var(--ivory-200);
+  display: flex; flex-direction: column;
+  padding: var(--sp-3xl) 0;
+}
+.modal-stepper-sidebar .sidebar-title {
+  font-size: 11px; font-weight: 600; color: var(--ivory-400);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  padding: 0 var(--sp-xl) var(--sp-xl);
+}
+.step-nav-list {
+  display: flex; flex-direction: column; gap: var(--sp-xxs);
+  flex: 1;
+}
+.step-nav-item {
+  display: flex; align-items: center; gap: var(--sp-lg);
+  padding: var(--sp-lg) var(--sp-xl);
+  cursor: pointer; transition: all 0.15s;
+  border-left: 3px solid transparent;
+  margin-left: -1px;
+}
+.step-nav-item:hover { background: var(--ivory-100); }
+.step-nav-item.active {
+  background: var(--teal-25);
+  border-left-color: var(--teal-600);
+}
+.step-nav-item.done .step-nav-num {
+  background: var(--teal-400); color: var(--white); border-color: var(--teal-400);
+}
+.step-nav-item.active .step-nav-num {
+  background: var(--teal-600); color: var(--white); border-color: var(--teal-600);
+}
+.step-nav-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600;
+  border: 2px solid var(--ivory-300);
+  color: var(--ivory-400); background: var(--white);
+  flex-shrink: 0; transition: all 0.2s;
+}
+.step-nav-label {
+  font-size: 13px; font-weight: 500; color: var(--ivory-500);
+  line-height: 1.3;
+}
+.step-nav-item.active .step-nav-label { color: var(--teal-800); font-weight: 600; }
+.step-nav-item.done .step-nav-label { color: var(--ivory-700); }
+
+/* Checkmark for done steps */
+.step-nav-item.done .step-nav-num .num-text { display: none; }
+.step-nav-item.done .step-nav-num .check-icon { display: block; }
+.step-nav-num .check-icon { display: none; }
+
+/* --- Right: Main Content --- */
+.modal-main {
+  flex: 1; display: flex; flex-direction: column; min-width: 0;
+}
+.modal-header {
+  padding: var(--sp-3xl) var(--sp-3xl) var(--sp-xl);
+  border-bottom: 1px solid var(--ivory-100);
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.modal-header-text {}
+.modal-title { font-size: 18px; font-weight: 600; color: var(--ivory-900); }
+.modal-subtitle { font-size: 14px; color: var(--ivory-500); margin-top: var(--sp-xxs); }
+.close-btn {
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-sm); color: var(--ivory-500); flex-shrink: 0;
+}
+.close-btn:hover { background: var(--ivory-100); }
+
+.modal-body { padding: var(--sp-3xl); overflow-y: auto; flex: 1; }
+.modal-footer {
+  padding: var(--sp-xl) var(--sp-3xl);
+  border-top: 1px solid var(--ivory-100);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.form-group { margin-bottom: var(--sp-2xl); }
+.form-label { display: block; font-size: 14px; font-weight: 500; color: var(--ivory-700); margin-bottom: var(--sp-sm); }
+.form-input {
+  width: 100%; padding: 10px var(--sp-lg); border: 1px solid var(--ivory-200);
+  border-radius: var(--r-md); font-size: 14px; color: var(--ivory-800);
+  background: var(--white); outline: none; transition: border 0.15s;
+}
+.form-input:focus { border-color: var(--teal-500); box-shadow: 0 0 0 3px rgba(43,166,176,0.12); }
+.form-input::placeholder { color: var(--ivory-400); }
+.form-textarea { resize: vertical; min-height: 100px; }
+
+/* Info tooltip */
+.info-icon-wrap {
+  position: relative; display: inline-flex; align-items: center; margin-left: 4px;
+}
+.info-icon {
+  width: 16px; height: 16px; color: var(--ivory-400); cursor: help;
+  transition: color 0.15s;
+}
+.info-icon-wrap:hover .info-icon { color: var(--ivory-600); }
+.info-tooltip {
+  position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  width: 260px; padding: var(--sp-md) var(--sp-lg);
+  background: var(--ivory-800); color: var(--white); border-radius: var(--r-md);
+  font-size: 12px; line-height: 1.5; font-weight: 400;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  z-index: 70;
+}
+.info-tooltip::after {
+  content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-bottom-color: var(--ivory-800);
+}
+.info-icon-wrap:hover .info-tooltip { opacity: 1; pointer-events: auto; }
+.info-tooltip strong { font-weight: 600; color: var(--teal-300); }
+
+.upload-zone {
+  border: 2px dashed var(--ivory-300); border-radius: var(--r-md);
+  padding: var(--sp-3xl) var(--sp-xl); text-align: center; cursor: pointer; transition: all 0.15s;
+}
+.upload-zone:hover { border-color: var(--teal-400); background: var(--teal-25); }
+.upload-zone svg { width: 36px; height: 36px; color: var(--ivory-400); margin-bottom: var(--sp-md); }
+.upload-zone p { font-size: 14px; color: var(--ivory-500); }
+.upload-zone .upload-cta { color: var(--teal-600); font-weight: 600; }
+
+.or-divider {
+  display: flex; align-items: center; gap: var(--sp-xl);
+  margin: var(--sp-2xl) 0; color: var(--ivory-400); font-size: 12px; font-weight: 500;
+}
+.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--ivory-200); }
+
+/* Segment control */
+.segment-control {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: var(--ivory-100); border: 1px solid var(--ivory-200);
+  border-radius: var(--r-md); padding: 2px;
+}
+.segment-opt {
+  padding: 4px 12px; font-size: 14px; font-weight: 600; color: var(--ivory-400);
+  border-radius: var(--r-md); cursor: pointer; transition: all 0.15s;
+  line-height: 20px; text-align: center; white-space: nowrap; border: 1px solid transparent;
+}
+.segment-opt.active-ai, .segment-opt.active-manual {
+  background: var(--ivory-25); color: var(--teal-600);
+  border: 1px solid var(--ivory-300); box-shadow: 0 1px 2px rgba(16,24,40,0.05);
+}
+
+/* Segment tooltip */
+.segment-control { position: relative; }
+.segment-tooltip {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  width: 220px; padding: var(--sp-md) var(--sp-lg);
+  background: var(--ivory-800); color: var(--white); border-radius: var(--r-md);
+  font-size: 12px; line-height: 1.5; font-weight: 400; text-align: left;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  z-index: 70; white-space: normal;
+}
+.segment-tooltip::after {
+  content: ''; position: absolute; bottom: 100%; right: 24px;
+  border: 6px solid transparent; border-bottom-color: var(--ivory-800);
+}
+.segment-control:hover .segment-tooltip { opacity: 1; }
+
+/* Manual-only badge */
+.manual-only-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  background: var(--ivory-100); border: 1px solid var(--ivory-200);
+  border-radius: var(--r-md); font-size: 13px; font-weight: 500; color: var(--ivory-600);
+  white-space: nowrap;
+}
+.manual-only-badge svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--ivory-400); }
+.manual-only-hint {
+  font-size: 11px; color: var(--ivory-400); font-weight: 400; margin-top: 2px;
+}
+
+.item-list { display: flex; flex-direction: column; }
+.item-row {
+  display: flex; align-items: center; gap: var(--sp-lg); padding: var(--sp-lg) 0;
+  border-bottom: 1px solid var(--ivory-100);
+}
+.item-row:last-child { border-bottom: none; }
+.item-num { font-size: 12px; font-weight: 600; color: var(--ivory-400); width: 24px; text-align: center; }
+.item-text { flex: 1; font-size: 14px; color: var(--ivory-700); line-height: 20px; }
+.item-summary {
+  display: flex; gap: var(--sp-3xl); padding: var(--sp-lg) 0;
+  font-size: 13px; color: var(--ivory-500); margin-bottom: var(--sp-lg);
+}
+.item-summary strong { color: var(--ivory-700); }
+
+/* ============================================================
+   OVERLAP BANNER (inline, expandable, Step 2)
+   ============================================================ */
+.overlap-banner {
+  border: 1px solid var(--warning-50);
+  background: var(--warning-25);
+  border-radius: var(--r-lg);
+  margin-bottom: var(--sp-xl);
+  overflow: hidden;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.overlap-banner.resolved {
+  background: var(--ivory-50);
+  border-color: var(--ivory-200);
+}
+.overlap-row {
+  display: flex; align-items: center; gap: var(--sp-lg);
+  padding: var(--sp-lg) var(--sp-xl);
+}
+.overlap-row .overlap-icon {
+  width: 20px; height: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--warning-500);
+}
+.overlap-banner.resolved .overlap-row .overlap-icon { color: var(--teal-600); }
+.overlap-row .overlap-text {
+  flex: 1; font-size: 13px; color: var(--ivory-700); line-height: 20px;
+}
+.overlap-row .overlap-text strong { color: var(--ivory-900); font-weight: 600; }
+.overlap-row .overlap-cta {
+  padding: 6px 14px; font-size: 13px; font-weight: 500;
+  color: var(--warning-500); background: transparent;
+  border: 1px solid var(--warning-50); border-radius: var(--r-md);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.overlap-row .overlap-cta:hover { background: var(--warning-50); color: #8a5a1e; }
+.overlap-row .overlap-link {
+  font-size: 13px; font-weight: 500; color: var(--teal-700);
+  background: none; border: none; cursor: pointer; padding: 0;
+}
+.overlap-row .overlap-link:hover { text-decoration: underline; }
+.overlap-panel {
+  display: none;
+  padding: 0 var(--sp-xl) var(--sp-xl) var(--sp-xl);
+  animation: overlapExpand 0.25s ease;
+}
+.overlap-banner.expanded .overlap-panel { display: block; }
+.overlap-banner.expanded .overlap-row { padding-bottom: var(--sp-md); }
+@keyframes overlapExpand {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.overlap-panel-desc {
+  font-size: 12px; color: var(--ivory-600); line-height: 18px;
+  padding: 0 0 var(--sp-lg) 32px;
+  margin-top: -4px;
+}
+.overlap-card {
+  background: var(--white);
+  border: 1px solid var(--ivory-200);
+  border-radius: var(--r-md);
+  margin-bottom: var(--sp-md);
+  overflow: hidden;
+}
+.overlap-card-title {
+  padding: var(--sp-md) var(--sp-lg);
+  font-size: 13px; font-weight: 600; color: var(--ivory-900);
+  border-bottom: 1px solid var(--ivory-100);
+  background: var(--ivory-25);
+}
+.overlap-choice {
+  display: flex; align-items: flex-start; gap: var(--sp-lg);
+  padding: var(--sp-lg);
+  border-bottom: 1px solid var(--ivory-100);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.overlap-choice:last-child { border-bottom: none; }
+.overlap-choice:hover { background: var(--ivory-25); }
+.overlap-choice .overlap-radio {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--ivory-300);
+  background: var(--white); flex-shrink: 0; margin-top: 2px;
+  position: relative; transition: all 0.15s;
+}
+.overlap-choice.selected .overlap-radio { border-color: var(--teal-600); }
+.overlap-choice.selected .overlap-radio::after {
+  content: ''; position: absolute; inset: 3px;
+  border-radius: 50%; background: var(--teal-600);
+}
+.overlap-choice-body { flex: 1; min-width: 0; }
+.overlap-choice-label {
+  display: flex; align-items: center; gap: var(--sp-md);
+  font-size: 13px; font-weight: 600; color: var(--ivory-900);
+  margin-bottom: 2px;
+}
+.overlap-choice-desc {
+  font-size: 12px; color: var(--ivory-500); line-height: 18px;
+}
+.recommended-chip {
+  display: inline-flex; align-items: center;
+  padding: 1px 8px; font-size: 10px; font-weight: 600;
+  color: var(--teal-700); background: var(--teal-50);
+  border: 1px solid var(--teal-200); border-radius: var(--r-full);
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.overlap-panel-actions {
+  display: flex; justify-content: flex-end; gap: var(--sp-md);
+  padding-top: var(--sp-md);
+}
+.overlap-btn-cancel {
+  padding: 6px 14px; font-size: 13px; font-weight: 500;
+  color: var(--ivory-700); background: var(--white);
+  border: 1px solid var(--ivory-300); border-radius: var(--r-md);
+  cursor: pointer;
+}
+.overlap-btn-cancel:hover { background: var(--ivory-50); }
+.overlap-btn-apply {
+  padding: 6px 14px; font-size: 13px; font-weight: 500;
+  color: var(--white); background: var(--teal-600);
+  border: 1px solid var(--teal-600); border-radius: var(--r-md);
+  cursor: pointer;
+}
+.overlap-btn-apply:hover { background: var(--teal-700); border-color: var(--teal-700); }
+.overlap-btn-apply[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* Uploaded rules section header */
+.uploaded-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-lg) 0 var(--sp-md) 0;
+  border-bottom: 1px solid var(--ivory-100);
+}
+.uploaded-section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.6px;
+  color: var(--ivory-500); text-transform: uppercase;
+  display: flex; align-items: center; gap: var(--sp-md);
+}
+.uploaded-section-title .count-chip {
+  font-size: 11px; font-weight: 600; color: var(--ivory-600);
+  background: var(--ivory-100); padding: 1px 8px; border-radius: var(--r-full);
+  letter-spacing: 0;
+}
+
+/* Merged subsection (collapsible) */
+.merged-section {
+  margin-top: var(--sp-xl);
+  border-top: 1px solid var(--ivory-200);
+}
+.merged-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-lg) 0 var(--sp-md) 0;
+  cursor: pointer;
+  user-select: none;
+}
+.merged-section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.6px;
+  color: var(--ivory-500); text-transform: uppercase;
+  display: flex; align-items: center; gap: var(--sp-md);
+}
+.merged-section-title .count-chip {
+  font-size: 11px; font-weight: 600; color: var(--teal-700);
+  background: var(--teal-50); padding: 1px 8px; border-radius: var(--r-full);
+  letter-spacing: 0;
+}
+.merged-section-caret {
+  width: 16px; height: 16px; color: var(--ivory-400);
+  transition: transform 0.2s ease;
+}
+.merged-section:not(.open) .merged-section-caret { transform: rotate(-90deg); }
+.merged-list {
+  display: none;
+}
+.merged-section.open .merged-list { display: block; }
+.merged-row {
+  display: flex; align-items: center; gap: var(--sp-lg);
+  padding: var(--sp-md) 0;
+  border-bottom: 1px solid var(--ivory-100);
+}
+.merged-row:last-child { border-bottom: none; }
+.merged-row .merged-icon {
+  width: 16px; height: 16px; color: var(--teal-600); flex-shrink: 0;
+}
+.merged-row .merged-name {
+  flex: 1; font-size: 13px; color: var(--ivory-700); line-height: 20px;
+}
+.merged-row .merged-source {
+  font-size: 11px; color: var(--ivory-500); font-weight: 500;
+}
+.merged-unmerge-btn {
+  font-size: 12px; font-weight: 500; color: var(--teal-700);
+  background: none; border: none; cursor: pointer; padding: 2px 8px;
+  border-radius: var(--r-sm);
+}
+.merged-unmerge-btn:hover { background: var(--teal-50); text-decoration: underline; }
+
+/* AI processing */
+.ai-processing { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp-6xl) 0; gap: var(--sp-3xl); }
+.spinner {
+  width: 48px; height: 48px; border: 4px solid var(--ivory-200);
+  border-top-color: var(--teal-600); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-status { font-size: 16px; font-weight: 500; color: var(--ivory-700); }
+.ai-detail { font-size: 13px; color: var(--ivory-400); }
+.ai-progress-bar { width: 300px; height: 6px; background: var(--ivory-100); border-radius: 3px; overflow: hidden; }
+.ai-progress-fill { height: 100%; background: var(--teal-500); border-radius: 3px; transition: width 0.5s ease; }
+
+/* Rules table */
+.rules-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.rules-table th {
+  text-align: left; font-size: 11px; font-weight: 600; color: var(--ivory-500);
+  padding: var(--sp-md) var(--sp-lg); border-bottom: 1px solid var(--ivory-200);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.rules-table td {
+  padding: var(--sp-lg); font-size: 13px; color: var(--ivory-700);
+  border-bottom: 1px solid var(--ivory-100); vertical-align: middle;
+}
+.rules-table tr:hover td { background: var(--ivory-50); }
+.rule-type-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: var(--r-full); font-size: 11px; font-weight: 500;
+}
+.rule-ai { background: var(--teal-50); color: var(--teal-700); }
+.rule-ai::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--teal-500); }
+.rule-manual { background: var(--ivory-100); color: var(--ivory-600); }
+.rule-manual::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ivory-400); }
+
+/* Severity toggles */
+.severity-toggle {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: var(--ivory-100); border: 1px solid var(--ivory-200);
+  border-radius: var(--r-md); padding: 2px;
+}
+.severity-opt {
+  padding: 4px 12px; font-size: 14px; font-weight: 600; color: var(--ivory-400);
+  border-radius: var(--r-md); cursor: pointer; transition: all 0.15s;
+  line-height: 20px; text-align: center; white-space: nowrap; border: 1px solid transparent;
+}
+.severity-opt.sev-blocker {
+  background: var(--ivory-25); color: var(--error-500);
+  border: 1px solid var(--ivory-300); box-shadow: 0 1px 2px rgba(16,24,40,0.05);
+}
+.severity-opt.sev-suggestion {
+  background: var(--ivory-25); color: var(--blue-500);
+  border: 1px solid var(--ivory-300); box-shadow: 0 1px 2px rgba(16,24,40,0.05);
+}
+
+/* Severity tooltip — explains builder impact */
+.severity-toggle { position: relative; }
+.severity-tooltip {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  width: 260px; padding: var(--sp-md) var(--sp-lg);
+  background: var(--ivory-800); color: var(--white); border-radius: var(--r-md);
+  font-size: 12px; line-height: 1.5; font-weight: 400; text-align: left;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  z-index: 70; white-space: normal;
+}
+.severity-tooltip::after {
+  content: ''; position: absolute; bottom: 100%; right: 24px;
+  border: 6px solid transparent; border-bottom-color: var(--ivory-800);
+}
+.severity-tooltip strong { font-weight: 600; color: var(--white); }
+.severity-tooltip .sev-label-blocker { color: #ff9b9b; font-weight: 600; }
+.severity-tooltip .sev-label-suggestion { color: #b4d8ff; font-weight: 600; }
+.severity-tooltip p { margin: 0; }
+.severity-tooltip p + p { margin-top: 6px; }
+.severity-toggle:hover .severity-tooltip { opacity: 1; }
+
+.severity-summary-inline { display: flex; gap: var(--sp-xl); font-size: 13px; color: var(--ivory-500); }
+.severity-summary-inline strong { font-weight: 600; }
+.severity-summary-inline .blocker-count { color: var(--error-500); }
+.severity-summary-inline .suggestion-count { color: var(--blue-500); }
+
+/* 3-dot menu */
+.more-menu-wrap { position: relative; }
+.more-btn {
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-xs); color: var(--ivory-400); cursor: pointer; border: none; background: none;
+}
+.more-btn:hover { background: var(--ivory-100); color: var(--ivory-700); }
+.context-menu {
+  position: absolute; right: 0; top: 100%; margin-top: 4px;
+  background: var(--white); border: 1px solid var(--ivory-200); border-radius: var(--r-md);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1); min-width: 120px; z-index: 50;
+  display: none; flex-direction: column; overflow: hidden;
+}
+.context-menu.open { display: flex; }
+.context-menu-item {
+  padding: 8px 12px; font-size: 13px; font-weight: 500; color: var(--ivory-700);
+  cursor: pointer; border: none; background: none; text-align: left;
+}
+.context-menu-item:hover { background: var(--ivory-50); }
+.context-menu-item.destructive { color: var(--error-500); }
+.context-menu-item.destructive:hover { background: var(--error-25); }
+
+/* Confirm step */
+.confirm-section { margin-bottom: var(--sp-3xl); }
+.confirm-label { font-size: 12px; font-weight: 600; color: var(--ivory-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: var(--sp-xs); }
+.confirm-value { font-size: 16px; font-weight: 500; color: var(--ivory-800); }
+
+/* Test run — two columns */
+.modal-body.step4-body { overflow-y: hidden; display: flex; flex-direction: column; }
+.step4-body > .fade-content { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.step4-body .email-picker { flex-shrink: 0; }
+.test-col-left .email-picker { margin-bottom: var(--sp-md); }
+.test-columns {
+  display: flex; gap: var(--sp-xl);
+  min-height: 0; flex: 1; overflow: hidden;
+}
+.test-col-left {
+  flex: 0 0 42%; overflow-y: auto; display: flex; flex-direction: column;
+}
+.test-col-left .email-thumbnail {
+  margin-top: 0; flex: 1; display: flex; flex-direction: column;
+  border: 1px solid var(--ivory-200); border-radius: var(--r-md);
+}
+.test-col-left .email-thumb-body { flex: 1; max-height: none; }
+.test-col-right {
+  flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+}
+.test-col-title {
+  font-size: 12px; font-weight: 600; color: var(--ivory-500);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding-bottom: var(--sp-md); border-bottom: 1px solid var(--ivory-200);
+  margin-bottom: var(--sp-xs); flex-shrink: 0;
+}
+.test-col-right .rule-check-list {
+  display: flex; flex-direction: column; overflow-y: auto; min-height: 0; flex: 1;
+}
+
+.email-thumbnail {
+  margin-top: var(--sp-xl);
+  border: 1px solid var(--ivory-200);
+  border-radius: var(--r-md);
+  overflow: hidden; background: #fff;
+}
+.email-thumb-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--ivory-50); border-bottom: 1px solid var(--ivory-200);
+}
+.email-thumb-header span { font-size: 12px; font-weight: 600; color: var(--ivory-500); text-transform: uppercase; letter-spacing: 0.5px; }
+.email-thumb-body { padding: var(--sp-xl); max-height: 280px; overflow-y: auto; }
+.email-thumb-body .email-banner {
+  width: 100%; height: 120px; border-radius: var(--r-md);
+  margin-bottom: var(--sp-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.3px;
+}
+.email-thumb-body h3 { font-size: 15px; font-weight: 700; color: var(--ivory-800); margin: 0 0 var(--sp-sm) 0; }
+.email-thumb-body p { font-size: 12px; color: var(--ivory-500); line-height: 1.6; margin: 0 0 var(--sp-md) 0; }
+.email-thumb-body .email-cta {
+  display: inline-block; padding: 8px 20px; border-radius: var(--r-md);
+  font-size: 12px; font-weight: 600; color: #fff; text-decoration: none;
+}
+.email-thumb-body .email-footer-text { font-size: 10px; color: var(--ivory-400); margin-top: var(--sp-lg); border-top: 1px solid var(--ivory-100); padding-top: var(--sp-md); }
+
+.rule-check-row {
+  display: flex; align-items: center; gap: var(--sp-lg); padding: var(--sp-lg) 0;
+  border-bottom: 1px solid var(--ivory-100);
+}
+.rule-check-row:last-child { border-bottom: none; }
+.rule-check-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--ivory-700); line-height: 18px; }
+.rule-check-detail { font-size: 12px; color: var(--ivory-500); font-weight: 400; margin-top: 2px; }
+.rule-check-icon { width: 20px; height: 20px; flex-shrink: 0; }
+.rule-check-icon.pending { color: var(--ivory-300); }
+.rule-check-icon.pass { color: var(--success-500); }
+.rule-check-icon.fail { color: var(--error-500); }
+.rule-check-icon.fail-warning { color: var(--warning-500); }
+.rule-check-badge {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: var(--r-full); font-size: 11px; font-weight: 500; flex-shrink: 0;
+}
+.rule-check-badge.badge-blocker { background: var(--error-25); color: var(--error-500); }
+.rule-check-badge.badge-suggestion { background: var(--blue-50); color: var(--blue-500); }
+
+.rule-check-row.failed { cursor: pointer; position: relative; flex-wrap: wrap; padding-right: 24px; }
+.rule-check-row.failed.fail-blocker:hover { background: var(--error-25); }
+.rule-check-row.failed.fail-warning-row:hover { background: var(--warning-25); }
+
+/* AI list wrapper — removes the bottom border on the last AI row
+   so we don't double up with the Manual subsection's top border. */
+.ai-rule-list .rule-check-row:last-child { border-bottom: none; }
+
+/* Caret on failed rows (indicates expandability) — pinned top-right */
+.rule-check-row .fail-caret {
+  width: 14px; height: 14px; color: var(--ivory-400);
+  transition: transform 0.2s ease;
+  position: absolute; right: 0; top: var(--sp-lg);
+}
+.rule-check-row.expanded.fail-blocker .fail-caret { transform: rotate(180deg); color: var(--error-500); }
+.rule-check-row.expanded.fail-warning-row .fail-caret { transform: rotate(180deg); color: var(--warning-500); }
+
+/* Inline failure-details panel (hidden until .expanded) */
+.fail-details-panel {
+  display: none;
+  flex-basis: 100%;
+  margin-top: var(--sp-md);
+  padding: var(--sp-lg);
+  border-radius: var(--r-md);
+  cursor: default;
+}
+.rule-check-row.fail-blocker .fail-details-panel {
+  background: var(--error-25); border: 1px solid #f7d5d5;
+}
+.rule-check-row.fail-warning-row .fail-details-panel {
+  background: var(--warning-25); border: 1px solid var(--warning-50);
+}
+.rule-check-row.expanded .fail-details-panel { display: block; }
+.rule-check-row.expanded.fail-blocker { background: var(--error-25); }
+.rule-check-row.expanded.fail-warning-row { background: var(--warning-25); }
+
+.fail-detail-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--sp-lg);
+  font-size: 12px; line-height: 1.5;
+  padding: var(--sp-xs) 0;
+}
+.fail-blocker .fail-detail-row + .fail-detail-row { border-top: 1px dashed #f0cfcf; margin-top: var(--sp-xs); padding-top: var(--sp-md); }
+.fail-warning-row .fail-detail-row + .fail-detail-row { border-top: 1px dashed #ead0a8; margin-top: var(--sp-xs); padding-top: var(--sp-md); }
+.fail-detail-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.fail-blocker .fail-detail-label { color: var(--error-500); }
+.fail-warning-row .fail-detail-label { color: var(--warning-500); }
+.fail-detail-value {
+  color: var(--ivory-700);
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-md);
+}
+.fail-detail-viewbtn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; font-size: 11px; font-weight: 500;
+  color: var(--teal-700); background: var(--white);
+  border: 1px solid var(--ivory-200); border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.fail-detail-viewbtn:hover { background: var(--teal-25); border-color: var(--teal-200); }
+.fail-detail-viewbtn svg { width: 11px; height: 11px; }
+
+/* Manual checks subsection (non-automatable rules) */
+.manual-subsection {
+  margin-top: var(--sp-xl);
+  padding-top: var(--sp-lg);
+  border-top: 1px solid var(--ivory-200);
+}
+.manual-subsection-header {
+  display: flex; align-items: center; gap: var(--sp-md);
+  margin-bottom: var(--sp-md);
+}
+.manual-subsection-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+  color: var(--ivory-500); text-transform: uppercase;
+}
+.manual-count-chip {
+  font-size: 11px; font-weight: 600; color: var(--ivory-600);
+  background: var(--ivory-100); padding: 1px 8px; border-radius: var(--r-full);
+  letter-spacing: 0;
+}
+.manual-subsection-note {
+  display: flex; align-items: flex-start; gap: var(--sp-md);
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--ivory-50); border: 1px solid var(--ivory-200);
+  border-radius: var(--r-md);
+  font-size: 12px; color: var(--ivory-600); line-height: 1.5;
+  margin-bottom: var(--sp-md);
+}
+.manual-subsection-note svg {
+  width: 16px; height: 16px; flex-shrink: 0; color: var(--ivory-500); margin-top: 1px;
+}
+.rule-check-row.manual-rule {
+  opacity: 1;
+}
+.rule-check-row.manual-rule .rule-check-name { color: var(--ivory-700); }
+.rule-check-badge.badge-manual {
+  background: var(--ivory-100); color: var(--ivory-600);
+  border: 1px solid var(--ivory-200);
+}
+.rule-check-badge.badge-manual svg {
+  width: 10px; height: 10px; margin-right: 4px;
+}
+
+[data-section].error-highlight {
+  outline: 2px dashed var(--error-500); outline-offset: 3px;
+  border-radius: var(--r-xs); position: relative; transition: outline-color 0.3s ease;
+}
+[data-section].warning-highlight {
+  outline: 2px dashed var(--warning-500); outline-offset: 3px;
+  border-radius: var(--r-xs); position: relative; transition: outline-color 0.3s ease;
+}
+[data-section].error-highlight.pulse,
+[data-section].warning-highlight.pulse { animation: pulseOutline 0.6s ease; }
+@keyframes pulseOutline {
+  0% { outline-width: 2px; }
+  50% { outline-width: 4px; }
+  100% { outline-width: 2px; }
+}
+.missing-callout {
+  display: flex; align-items: center; gap: var(--sp-md);
+  padding: var(--sp-md) var(--sp-lg); margin-top: var(--sp-md);
+  border-radius: var(--r-sm); font-size: 12px; font-weight: 500;
+}
+.missing-callout.severity-blocker {
+  background: var(--error-25); border: 1px dashed var(--error-500); color: var(--error-500);
+}
+.missing-callout.severity-suggestion {
+  background: var(--warning-25); border: 1px dashed var(--warning-500); color: var(--warning-500);
+}
+.missing-callout svg { width: 16px; height: 16px; flex-shrink: 0; }
+.missing-callout.pulse { animation: pulseOutline 0.6s ease; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--ivory-800); color: var(--white); padding: var(--sp-lg) var(--sp-3xl);
+  border-radius: var(--r-md); font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: var(--sp-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  opacity: 0; transition: all 0.3s ease; z-index: 200;
+}
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast svg { width: 20px; height: 20px; color: var(--success-400); flex-shrink: 0; }
+
+.hidden { display: none !important; }
+/* ============================================================
+   MULTI-SELECT DROPDOWN
+   ============================================================ */
+.multi-select-wrap { position: relative; }
+.multi-select-trigger {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-sm);
+  min-height: 42px; padding: 6px var(--sp-lg);
+  border: 1px solid var(--ivory-200); border-radius: var(--r-md);
+  background: var(--white); cursor: pointer; transition: border 0.15s;
+}
+.multi-select-trigger:hover { border-color: var(--ivory-300); }
+.multi-select-trigger.open { border-color: var(--teal-500); box-shadow: 0 0 0 3px rgba(43,166,176,0.12); }
+.multi-select-trigger .placeholder {
+  font-size: 14px; color: var(--ivory-400); pointer-events: none; user-select: none;
+}
+.multi-select-trigger .chevron-icon {
+  width: 18px; height: 18px; color: var(--ivory-400); margin-left: auto; flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.multi-select-trigger.open .chevron-icon { transform: rotate(180deg); }
+.ms-chip {
+  display: inline-flex; align-items: center; gap: var(--sp-xs);
+  padding: 2px 8px 2px 10px; background: var(--teal-25); border: 1px solid var(--teal-200);
+  border-radius: var(--r-full); font-size: 12px; font-weight: 500; color: var(--teal-800);
+  white-space: nowrap;
+}
+.ms-chip-remove {
+  width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; cursor: pointer; color: var(--teal-600); flex-shrink: 0;
+}
+.ms-chip-remove:hover { background: var(--teal-100); }
+.ms-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--white); border: 1px solid var(--ivory-200); border-radius: var(--r-md);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 60;
+  max-height: 240px; overflow-y: auto;
+  display: none;
+}
+.ms-dropdown.open { display: block; }
+.ms-option {
+  display: flex; align-items: center; gap: var(--sp-lg);
+  padding: var(--sp-lg) var(--sp-xl); font-size: 14px; color: var(--ivory-700);
+  cursor: pointer; transition: background 0.1s;
+}
+.ms-option:hover { background: var(--ivory-50); }
+.ms-option.selected { background: var(--teal-25); }
+.ms-option .ms-check {
+  width: 18px; height: 18px; border: 2px solid var(--ivory-300); border-radius: var(--r-xs);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.ms-option.selected .ms-check {
+  background: var(--teal-600); border-color: var(--teal-600);
+}
+.ms-option .ms-check svg { display: none; }
+.ms-option.selected .ms-check svg { display: block; }
+.ms-divider { height: 1px; background: var(--ivory-100); margin: var(--sp-xs) 0; }
+.ms-option.select-all { font-weight: 600; color: var(--ivory-800); }
+.ms-footer {
+  position: sticky; bottom: 0; background: var(--white);
+  border-top: 1px solid var(--ivory-100);
+  padding: var(--sp-md) var(--sp-xl);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ms-footer .ms-count { font-size: 12px; color: var(--ivory-400); font-weight: 500; }
+.ms-footer .ms-done-btn {
+  padding: 5px 14px; font-size: 13px; font-weight: 600;
+  color: var(--teal-700); background: var(--teal-25); border: 1px solid var(--teal-200);
+  border-radius: var(--r-md); cursor: pointer; transition: all 0.15s;
+}
+.ms-footer .ms-done-btn:hover { background: var(--teal-100); border-color: var(--teal-300); }
+
+.fade-content { animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ============================================================
+   RESPONSIVE: Collapse sidebar stepper on narrow screens
+   ============================================================ */
+@media (max-width: 1100px) {
+  .modal { width: 96vw; height: 90vh; }
+  .modal-stepper-sidebar { width: 56px; padding: var(--sp-3xl) var(--sp-xs); }
+  .modal-stepper-sidebar .sidebar-title { display: none; }
+  .step-nav-item { padding: var(--sp-lg) var(--sp-sm); justify-content: center; border-left: none; border-bottom: none; }
+  .step-nav-item.active { border-left: 3px solid var(--teal-600); }
+  .step-nav-label { display: none; }
+}
+
+
+
+/* ============================================================
+   COMPLIANCE MODULES — ACCORDION LIST
+   ============================================================ */
+/* Toggle switch */
+.toggle-switch {
+  width: 36px; height: 20px; border-radius: 10px; background: var(--ivory-300);
+  position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--teal-500); }
+.toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%; background: var(--white);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15); transition: transform 0.2s;
+}
+.toggle-switch.on::after { transform: translateX(16px); }
+
+/* Compliance checkbox */
+.comp-checkbox {
+  width: 18px; height: 18px; border: 2px solid var(--ivory-300); border-radius: var(--r-xs);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  cursor: pointer; transition: all 0.15s;
+}
+.comp-checkbox.checked { background: var(--teal-600); border-color: var(--teal-600); }
+.comp-checkbox svg { display: none; }
+.comp-checkbox.checked svg { display: block; }
+
+.comp-rule-row {
+  display: flex; align-items: center; gap: var(--sp-lg); padding: var(--sp-lg) 0;
+  border-bottom: 1px solid var(--ivory-100);
+}
+.comp-rule-row:last-child { border-bottom: none; }
+.comp-rule-name { flex: 1; font-size: 14px; color: var(--ivory-700); }
+.comp-rule-type {
+  font-size: 11px; font-weight: 500; padding: 2px 8px;
+  background: var(--teal-50); color: var(--teal-700); border-radius: var(--r-full);
+}
+.merged-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; background: var(--success-25); border: 1px solid var(--success-100);
+  border-radius: var(--r-full); font-size: 11px; font-weight: 500; color: var(--success-500);
+  white-space: nowrap;
+}
+
+/* Compliance summary row (flat toolbar-style, differentiated from module cards) */
+.comp-summary-row {
+  display: flex; align-items: center; gap: var(--sp-md);
+  padding: var(--sp-sm) var(--sp-xs);
+  background: transparent; border: none;
+  margin-bottom: var(--sp-sm); border-bottom: 1px solid var(--ivory-100); padding-bottom: var(--sp-md);
+}
+
+.comp-summary-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--sp-sm); flex-wrap: wrap; }
+.comp-summary-label {
+  font-size: 11px; font-weight: 600; color: var(--ivory-500);
+  text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap;
+}
+.comp-summary-chips { display: flex; gap: var(--sp-xs); flex-wrap: wrap; }
+.comp-summary-chip {
+  display: inline-flex; align-items: center; padding: 2px 10px;
+  background: var(--teal-50); color: var(--teal-700);
+  border: 1px solid var(--teal-100); border-radius: var(--r-full);
+  font-size: 12px; font-weight: 500;
+}
+.comp-summary-empty { font-size: 12px; color: var(--ivory-400); font-style: italic; }
+.comp-summary-count {
+  font-size: 12px; font-weight: 500; color: var(--ivory-500);
+  white-space: nowrap;
+}
+.comp-summary-chevron { display: none; }
+
+/* Collapse toggle inside expanded view */
+.comp-collapse-btn {
+  display: inline-flex; align-items: center; gap: var(--sp-xs);
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--teal-600);
+  padding: var(--sp-sm) 0; margin-top: var(--sp-sm);
+}
+.comp-collapse-btn:hover { color: var(--teal-700); }
+.comp-collapse-btn svg { width: 14px; height: 14px; }
+
+.compliance-module-list { display: flex; flex-direction: column; gap: var(--sp-md); margin-bottom: var(--sp-xl); }
+.compliance-module {
+  border: 1px solid var(--ivory-200); border-radius: var(--r-lg); overflow: visible;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.compliance-module.enabled { border-color: var(--teal-300); box-shadow: 0 0 0 1px var(--teal-100); }
+.compliance-module-header {
+  display: flex; align-items: center; gap: var(--sp-lg);
+  padding: var(--sp-xl); cursor: pointer; transition: background 0.15s;
+}
+.compliance-module-header:hover { background: var(--ivory-25); }
+.compliance-module.enabled .compliance-module-header:hover { background: var(--teal-25); }
+.cm-icon {
+  width: 32px; height: 32px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+.cm-wcag .cm-icon { background: var(--blue-100); color: var(--blue-600); }
+.cm-hipaa .cm-icon { background: var(--error-50); color: var(--error-600); }
+.cm-gdpr .cm-icon { background: var(--purple-100); color: var(--purple-600); }
+.cm-canspam .cm-icon { background: var(--orange-100); color: var(--orange-600); }
+.cm-casl .cm-icon { background: var(--red-100); color: var(--red-600); }
+.cm-fda .cm-icon { background: var(--green-100); color: var(--green-600); }
+.cm-finra .cm-icon { background: var(--indigo-100); color: var(--indigo-600); }
+.cm-sec .cm-icon { background: var(--amber-100); color: var(--amber-600); }
+.cm-checklists .cm-icon { background: var(--teal-50); color: var(--teal-600); }
+.cm-checklists .cm-icon svg { width: 16px; height: 16px; }
+
+/* Checklists card spacing: sit directly under the compliance list with the same gap */
+#checklists-card { margin-top: var(--sp-md); }
+
+/* When screen-empty lives inside the Checklists card body, remove its dashed border so the card provides the chrome */
+.cm-body-checklists .empty-state { border: none; background: transparent; padding: var(--sp-xl) var(--sp-lg); }
+.cm-body-checklists .data-table { background: transparent; }
+.cm-info { flex: 1; min-width: 0; }
+.cm-name { font-size: 14px; font-weight: 600; color: var(--ivory-800); display: flex; align-items: center; gap: var(--sp-md); }
+.cm-pill {
+  display: inline-flex; align-items: center; padding: 1px 8px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.2px;
+  color: var(--ivory-500); background: var(--ivory-100);
+  border-radius: var(--r-full); white-space: nowrap;
+}
+.cm-desc { font-size: 12px; color: var(--ivory-500); margin-top: 1px; }
+.cm-meta { font-size: 12px; color: var(--ivory-400); white-space: nowrap; margin-right: var(--sp-md); }
+.compliance-module.enabled .cm-meta { color: var(--teal-700); }
+.cm-chevron { width: 18px; height: 18px; color: var(--ivory-400); transition: transform 0.2s; flex-shrink: 0; }
+.compliance-module.expanded .cm-chevron { transform: rotate(180deg); }
+.cm-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; border-top: 0px solid var(--ivory-100); border-radius: 0 0 var(--r-lg) var(--r-lg); }
+.compliance-module.expanded .cm-body { max-height: 1200px; border-top-width: 1px; }
+.cm-body-inner { padding: var(--sp-lg) var(--sp-xl); }
+
+/* Create Checklist icon button in section header */
+.cm-create-btn {
+  position: relative;
+  width: 28px; height: 28px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--teal-600); color: var(--white);
+  border: none; cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.cm-create-btn:hover { background: var(--teal-700); }
+.cm-create-btn svg { width: 14px; height: 14px; }
+.cm-create-btn .cm-create-tooltip {
+  display: none; position: absolute; bottom: calc(100% + 8px); right: 0;
+  background: var(--ivory-800); color: var(--white); font-size: 12px; font-weight: 500;
+  padding: 4px 10px; border-radius: var(--r-sm); white-space: nowrap;
+  pointer-events: none; z-index: 10;
+}
+.cm-create-btn .cm-create-tooltip::after {
+  content: ''; position: absolute; top: 100%; right: 7px;
+  border: 5px solid transparent; border-top-color: var(--ivory-800);
+}
+.cm-create-btn:hover .cm-create-tooltip { display: block; }</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <div class="top-nav-left">
+      <div class="top-nav-logo">
+        <svg width="96" height="22" viewBox="0 0 96 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.8036 21.9786C3.2496 21.6907 0.3612 19.1447 0.012 15.045L0 14.8927H3.6648L3.6816 15.0117C4.002 17.1627 5.4852 18.4928 7.8036 18.7521V21.9786ZM10.2132 9.37724L7.6992 8.84188C5.1972 8.31841 4.3128 7.63076 4.3128 6.22572C4.3128 4.73502 5.7756 3.57625 7.8036 3.37876V0.170128C3.6768 0.417586 0.6396 3.05397 0.6396 6.4934C0.6396 9.54975 2.6256 11.4699 6.7104 12.3598L8.892 12.8333C11.8548 13.4674 13.1184 14.374 13.1184 15.8659C13.1184 17.7861 11.1276 18.7045 9.0504 18.7949V22C12.99 21.881 16.8492 19.8573 16.8492 15.5114C16.8492 12.3717 14.6184 10.3124 10.2132 9.37724ZM12.8184 6.57192L12.8388 6.69565H16.5036L16.4868 6.53861C16.1208 2.7732 13.2912 0.371188 9.0492 0.165369V3.37043C11.1312 3.55959 12.552 4.75049 12.8184 6.57073V6.57192ZM22.8792 5.99135V2.31278H19.3884V8.86329H26.5896V5.99135H22.8792ZM22.8792 16.9652V10.0982H19.3884V17.4101C19.3884 19.6265 19.9032 21.674 23.664 21.674C24.8604 21.674 25.3092 21.674 26.4516 21.6169L26.5884 21.6086V18.7783H24.498C23.3556 18.7783 22.878 18.5273 22.878 16.9652H22.8792ZM63.8532 16.6154L63.8364 16.4917H60.438L60.4548 16.6523C60.7668 19.7051 63.0684 21.6859 66.5508 21.9667V19.0008C65.0388 18.7664 64.074 17.9253 63.8544 16.6154H63.8532ZM68.316 12.2242L66.7908 11.9565C64.8456 11.6103 64.1568 11.1737 64.1568 10.2886C64.1568 9.33679 65.1252 8.64439 66.5508 8.54564V5.62016C63.1524 5.78077 60.816 7.76639 60.816 10.555C60.816 12.8869 62.52 14.4228 65.7528 14.9998L67.278 15.2675C69.6336 15.6839 70.5108 16.2228 70.5108 17.2614C70.5108 18.4154 69.156 18.9877 67.7976 19.0614V21.9941C70.8936 21.8668 73.9104 20.1322 73.9104 16.9307C73.9104 14.4014 72.132 12.9059 68.3172 12.2218L68.316 12.2242ZM70.1532 10.5348L70.182 10.6419H73.5432L73.5228 10.4777C73.1784 7.7878 70.9176 5.91283 67.7964 5.64514V8.60275C68.802 8.76336 69.8076 9.26184 70.152 10.5348H70.1532ZM92.478 0V21.6455H96V0H92.478ZM44.7564 11.9232V21.6455H48.2796V11.9232C48.2796 10.304 49.4508 8.95728 50.9976 8.66818V5.66537C47.4984 5.94971 44.7564 8.64439 44.7564 11.9232ZM52.2432 5.66537V8.66818C53.7888 8.95609 54.9612 10.304 54.9612 11.9232V21.6455H58.4808V11.9232C58.4808 8.64439 55.7424 5.94971 52.2444 5.66537H52.2432ZM79.1784 5.99135H75.6552V15.7136C75.6552 18.9924 78.3972 21.6823 81.8916 21.9714V18.9686C80.346 18.676 79.1784 17.3292 79.1784 15.7136V5.99135ZM85.86 5.99135V15.7136C85.86 17.3328 84.6888 18.6795 83.1384 18.9686V21.9714C86.6376 21.6871 89.3796 18.9972 89.3796 15.7136V5.99135H85.86ZM42.4368 16.9699L42.3828 17.1508C41.4228 20.5616 38.0904 21.8596 35.3856 21.9619V18.9508C36.6072 18.9056 38.112 18.5177 38.8848 17.0437L38.9268 16.9699H42.438H42.4368ZM42.5412 14.9427H30.6204C30.9108 17.0021 32.2656 18.4773 34.14 18.8568V21.9262C29.8848 21.5313 26.9892 18.2596 26.9892 13.6994C26.9892 12.3313 27.264 11.1285 27.7416 10.0994C27.7704 10.0292 27.804 9.96377 27.8376 9.89714C29.1048 7.34285 31.6188 5.8926 34.1412 5.67013V8.66461C32.2548 8.89898 30.8796 10.2172 30.5928 12.104H38.8536C38.6412 10.2172 37.2948 8.89541 35.388 8.66461V5.65704C39.036 5.89617 42.5436 8.52423 42.5436 14.0563V14.9415L42.5412 14.9427Z" fill="#201F1D"/>
+        </svg>
+      </div>
+      <div class="top-nav-items">
+        <a class="top-nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Emails
+        </a>
+        <a class="top-nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          Landing Pages
+        </a>
+        <a class="top-nav-item" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          Projects
+        </a>
+        <a class="top-nav-item active" href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.6V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Admin
+        </a>
+      </div>
+    </div>
+    <div class="top-nav-right">
+      <button class="top-nav-tour-btn">Take Email Builder Tour</button>
+      <a class="top-nav-help" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        Help Center
+      </a>
+      <div class="top-nav-user">KY</div>
+    </div>
+  </nav>
+
+  <!-- BODY -->
+  <div class="body-wrap">
+    <aside class="sidebar">
+      <div class="nav-section">
+        <div class="nav-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12.0001L11.6422 16.8212C11.7734 16.8868 11.839 16.9196 11.9078 16.9325C11.9687 16.9439 12.0313 16.9439 12.0922 16.9325C12.161 16.9196 12.2266 16.8868 12.3578 16.8212L22 12.0001M2 17.0001L11.6422 21.8212C11.7734 21.8868 11.839 21.9196 11.9078 21.9325C11.9687 21.9439 12.0313 21.9439 12.0922 21.9325C12.161 21.9196 12.2266 21.8868 12.3578 21.8212L22 17.0001M2 7.00006L11.6422 2.17895C11.7734 2.11336 11.839 2.08056 11.9078 2.06766C11.9687 2.05622 12.0313 2.05622 12.0922 2.06766C12.161 2.08056 12.2266 2.11336 12.3578 2.17895L22 7.00006L12.3578 11.8212C12.2266 11.8868 12.161 11.9196 12.0922 11.9325C12.0313 11.9439 11.9687 11.9439 11.9078 11.9325C11.839 11.9196 11.7734 11.8868 11.6422 11.8212L2 7.00006Z"/></svg>
+          Studio
+          <svg class="chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12l5-5 5 5"/></svg>
+        </div>
+        <div class="nav-sub-items">
+          <div class="nav-sub-item">Modules</div>
+          <div class="nav-sub-item">Libraries</div>
+          <div class="nav-sub-item">Fonts</div>
+          <div class="nav-sub-item">Brand Books</div>
+          <div class="nav-sub-item">Snippets</div>
+          <div class="nav-sub-item">Conditionals</div>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8L15 8M15 8C15 9.65686 16.3431 11 18 11C19.6569 11 21 9.65685 21 8C21 6.34315 19.6569 5 18 5C16.3431 5 15 6.34315 15 8ZM9 16L21 16M9 16C9 17.6569 7.65685 19 6 19C4.34315 19 3 17.6569 3 16C3 14.3431 4.34315 13 6 13C7.65685 13 9 14.3431 9 16Z"/></svg>
+          Settings
+          <svg class="chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12l5-5 5 5"/></svg>
+        </div>
+        <div class="nav-sub-items">
+          <div class="nav-sub-item">General</div>
+          <div class="nav-sub-item">Authentication</div>
+          <div class="nav-sub-item">Integrations</div>
+          <div class="nav-sub-item">Dashboard views</div>
+          <div class="nav-sub-item">Tags</div>
+          <div class="nav-sub-item">API connections</div>
+          <div class="nav-sub-item active">Governance</div>
+        </div>
+      </div>
+      <div class="nav-item-single">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Users
+        <svg class="chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8l5 5 5-5"/></svg>
+      </div>
+      <div class="nav-item-single">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.49962 11.5L11.4996 13.5L15.9996 9M12.4996 20C17.194 20 20.9996 16.1944 20.9996 11.5C20.9996 6.80558 17.194 3 12.4996 3C7.8052 3 3.99962 6.80558 3.99962 11.5C3.99962 12.45 4.15547 13.3636 4.443 14.2166C4.55119 14.5376 4.60529 14.6981 4.61505 14.8214C4.62469 14.9432 4.6174 15.0286 4.58728 15.1469C4.55677 15.2668 4.48942 15.3915 4.35472 15.6408L2.71906 18.6684C2.48575 19.1002 2.36909 19.3161 2.3952 19.4828C2.41794 19.6279 2.50337 19.7557 2.6288 19.8322C2.7728 19.9201 3.01692 19.8948 3.50517 19.8444L8.62619 19.315C8.78127 19.299 8.85881 19.291 8.92949 19.2937C8.999 19.2963 9.04807 19.3029 9.11586 19.3185C9.18478 19.3344 9.27145 19.3678 9.44478 19.4345C10.3928 19.7998 11.4228 20 12.4996 20Z"/></svg>
+        Approval Workflows
+        <svg class="chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8l5 5 5-5"/></svg>
+      </div>
+      <div class="nav-item-single">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        Image gallery
+      </div>
+      <div class="nav-item-single">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 11H8M10 15H8M16 7H8M20 6.8V17.2C20 18.8802 20 19.7202 19.673 20.362C19.3854 20.9265 18.9265 21.3854 18.362 21.673C17.7202 22 16.8802 22 15.2 22H8.8C7.11984 22 6.27976 22 5.63803 21.673C5.07354 21.3854 4.6146 20.9265 4.32698 20.362C4 19.7202 4 18.8802 4 17.2V6.8C4 5.11984 4 4.27976 4.32698 3.63803C4.6146 3.07354 5.07354 2.6146 5.63803 2.32698C6.27976 2 7.11984 2 8.8 2H15.2C16.8802 2 17.7202 2 18.362 2.32698C18.9265 2.6146 19.3854 3.07354 19.673 3.63803C20 4.27976 20 5.11984 20 6.8Z"/></svg>
+        Activity Logs
+      </div>
+      <div class="nav-item-single">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Webhooks logs
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Governance</h1>
+          <p class="page-subtitle" style="line-height: 1.55;">Pre-built compliance frameworks like WCAG, GDPR, and CAN-SPAM automatically check your emails for accessibility, privacy, and regulatory issues. Create Checklists to add custom brand rules tailored to specific libraries and campaigns.</p>
+        </div>
+        <!-- Create Checklist CTA moved to Checklists section header -->
+      </div>
+      <div class="content-area">
+        <div class="page-section">
+          <div class="compliance-module-list" id="compliance-module-list"></div>
+
+          <!-- Checklists card — sibling of compliance modules, same visual treatment -->
+          <div class="compliance-module cm-checklists expanded" id="checklists-card" data-card="checklists" style="display:none;">
+            <div class="compliance-module-header" onclick="toggleChecklistsCard()">
+              <div class="cm-icon">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10l3 3 9-9"/></svg>
+              </div>
+              <div class="cm-info">
+                <div class="cm-name">Custom Checklists</div>
+                <div class="cm-desc">Custom rule sets built for specific libraries and campaigns</div>
+              </div>
+              <span class="cm-meta" id="checklists-meta">No checklists yet</span>
+              <button class="cm-create-btn" id="checklist-create-icon-btn" style="display:none;" onclick="event.stopPropagation(); openModal()">
+                <span class="cm-create-tooltip">Create Checklist</span>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+              </button>
+              <svg class="cm-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+            </div>
+            <div class="cm-body">
+              <div class="cm-body-inner cm-body-checklists">
+                <div id="screen-empty" class="empty-state">
+                  <div class="empty-icon">
+                    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="8" width="28" height="24" rx="3"/><path d="M6 16h28"/><path d="M14 22h12"/><path d="M14 28h8"/></svg>
+                  </div>
+                  <div class="empty-title">No checklists yet</div>
+                  <div class="empty-desc">Checklist QA helps you enforce quality standards by automatically checking emails against your brand rules before they go live.</div>
+                  <button class="btn btn-primary" onclick="openModal()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+                    Create Checklist
+                  </button>
+                </div>
+
+                <div id="screen-list" class="hidden">
+                  <table class="data-table fade-content">
+                    <thead>
+                      <tr>
+                        <th style="width:24%;">Checklist name</th>
+                        <th style="width:28%;">Library</th>
+                        <th style="width:14%; white-space:nowrap;">Rules</th>
+                        <th style="width:11%;">Status</th>
+                        <th style="width:13%;">Last modified</th>
+                        <th style="width:44px;"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="checklist-tbody">
+                      <!-- Rows are rendered dynamically by activateChecklist() -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ====== MODAL WIZARD ====== -->
+<div id="modal-overlay" class="modal-overlay" onclick="event.target===this && closeModal()">
+  <div class="modal" id="modal-dialog" onclick="event.stopPropagation()">
+    <!-- LEFT: Stepper Sidebar -->
+    <div class="modal-stepper-sidebar">
+      <div class="sidebar-title">Checklist setup</div>
+      <div class="step-nav-list" id="step-nav-list"></div>
+    </div>
+
+    <!-- RIGHT: Main content -->
+    <div class="modal-main">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <div class="modal-title" id="modal-title">Create Checklist</div>
+          <div class="modal-subtitle" id="modal-subtitle">Name your checklist and upload your rules</div>
+        </div>
+        <button class="close-btn" onclick="closeModal()">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="5" x2="15" y2="15"/><line x1="15" y1="5" x2="5" y2="15"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast">
+  <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z"/></svg>
+  <span>Checklist activated successfully</span>
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let currentStep = 1;
+const totalSteps = 4;
+let savedLibrary = 'Not selected';
+let savedChecklistName = '';
+let isEditMode = false;
+let checklistRowSeq = 0;   // unique id for each created list row
+let editingRowId = null;   // data-checklist-row id of the row currently being edited
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const sampleRules = [
+  { id: 1, name: 'Alt text required on all images', category: 'Accessibility', type: 'ai', severity: 'blocker' },
+  { id: 2, name: 'Subject line under 60 characters', category: 'Deliverability', type: 'ai', severity: 'blocker' },
+  { id: 3, name: 'Unsubscribe link present in footer', category: 'Compliance', type: 'ai', severity: 'blocker' },
+  { id: 4, name: 'CTA button contrast ratio ≥ 4.5:1', category: 'Accessibility', type: 'ai', severity: 'suggestion' },
+  { id: 5, name: 'No broken image links', category: 'Quality', type: 'ai', severity: 'blocker' },
+  { id: 6, name: 'Preheader text is set and under 90 characters', category: 'Deliverability', type: 'ai', severity: 'suggestion' },
+  { id: 7, name: 'Brand logo appears in header module', category: 'Brand', type: 'manual', severity: 'suggestion', manualOnly: true, manualReason: 'Requires visual verification' },
+  { id: 8, name: 'Legal disclaimer matches latest approved copy', category: 'Compliance', type: 'manual', severity: 'blocker', manualOnly: true, manualReason: 'Requires human judgment' },
+];
+
+
+/* ============================================================
+   OVERLAP DATA — maps uploaded rule ids to existing WCAG rules
+   ============================================================ */
+const overlapMap = {
+  1: {
+    uploadedName: 'Alt text required on all images',
+    uploadedDesc: 'Checks if alt attribute exists on <img> tags',
+    wcagName: 'Alt text required on all images',
+    wcagDesc: 'Checks alt attribute, validates length, flags decorative images, verifies screen reader compatibility',
+    moduleId: 'wcag',
+  },
+  4: {
+    uploadedName: 'CTA button contrast ratio ≥ 4.5:1',
+    uploadedDesc: 'Checks foreground/background contrast on CTA buttons',
+    wcagName: 'CTA button contrast ratio ≥ 4.5:1',
+    wcagDesc: 'Full WCAG 2.1 AA contrast check on all interactive elements with large text exception handling',
+    moduleId: 'wcag',
+  },
+};
+const overlapRuleIds = Object.keys(overlapMap).map(Number);
+
+// runtime state for the overlap banner
+let overlapBannerState = 'collapsed'; // 'collapsed' | 'expanded' | 'resolved'
+let ruleMergeStatus = {};             // { <ruleId>: 'merged' | 'kept' }
+let pendingMergeSelection = {};       // { <ruleId>: 'wcag' | 'yours' } while editing
+let mergedSectionOpen = true;
+
+const complianceModules = [
+  { id: 'wcag', label: 'WCAG', fullName: 'WCAG — Accessibility', desc: 'Web Content Accessibility Guidelines',
+    icon: 'W3', enabled: true, cssClass: 'wcag',
+    rules: [
+      { name: 'Alt text required on all images', merged: true, type: 'deterministic' },
+      { name: 'CTA button contrast ratio ≥ 4.5:1', merged: true, type: 'deterministic' },
+      { name: 'Focus indicators on interactive elements', type: 'ai' },
+      { name: 'Minimum font size 14px', type: 'deterministic' },
+      { name: 'Link text is descriptive (no "click here")', type: 'ai' },
+      { name: 'Sufficient line height (≥ 1.5)', type: 'deterministic' },
+      { name: 'Table elements have headers', type: 'deterministic' },
+      { name: 'No auto-playing media', type: 'deterministic' },
+      { name: 'Semantic heading hierarchy', type: 'ai' },
+      { name: 'Plain-text fallback available', type: 'deterministic' },
+      { name: 'Language attribute set on <html>', type: 'deterministic' },
+      { name: 'Role attributes on dynamic content', type: 'ai' },
+    ]
+  },
+  { id: 'gdpr', label: 'GDPR', fullName: 'GDPR — Privacy', desc: 'General Data Protection Regulation',
+    icon: 'G', enabled: true, cssClass: 'gdpr',
+    rules: [
+      { name: 'Consent language present', type: 'ai' },
+      { name: 'Right to erasure link in footer', type: 'deterministic' },
+      { name: 'Data processing purpose stated', type: 'ai' },
+      { name: 'Data controller contact information', type: 'ai' },
+      { name: 'Privacy policy link present', type: 'deterministic' },
+      { name: 'No cross-border data transfer without notice', type: 'ai' },
+    ]
+  },
+  { id: 'canspam', label: 'CAN-SPAM', fullName: 'CAN-SPAM', desc: 'U.S. commercial email regulations',
+    icon: 'CS', enabled: false, cssClass: 'canspam',
+    rules: [
+      { name: 'Physical mailing address in footer', type: 'deterministic' },
+      { name: 'Opt-out mechanism present and functional', type: 'deterministic' },
+      { name: 'Subject line not deceptive or misleading', type: 'ai' },
+      { name: '"From" header accurately identifies sender', type: 'deterministic' },
+      { name: 'Email identified as advertisement if applicable', type: 'ai' },
+    ]
+  },
+];
+
+const stepMeta = [
+  { title: 'Create Checklist', subtitle: 'Name your checklist and upload your rules', label: 'Upload', icon: 'setup' },
+  { title: 'Review & Categorize', subtitle: 'Decide which items AI should check automatically', label: 'Categorize', icon: 'categorize' },
+  { title: 'Rules & Severity', subtitle: 'Review your rules and set severity levels', label: 'Rules', icon: 'rules' },
+  { title: 'Confirm & Activate', subtitle: 'Review your checklist configuration', label: 'Confirm', icon: 'confirm' },
+];
+
+/* ============================================================
+   MODAL OPEN / CLOSE
+   ============================================================ */
+function openModal() {
+  isEditMode = false;
+  editingRowId = null;
+  selectedLibraries = [];
+  savedChecklistName = '';
+  fileUploaded = false;
+  currentStep = 1;
+  // reset overlap banner state
+  overlapBannerState = 'collapsed';
+  ruleMergeStatus = {};
+  pendingMergeSelection = {};
+  overlapRuleIds.forEach(id => { pendingMergeSelection[id] = 'wcag'; });
+  mergedSectionOpen = true;
+  document.getElementById('modal-overlay').classList.add('visible');
+  renderStep();
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+}
+
+/* ============================================================
+   STEPPER SIDEBAR
+   ============================================================ */
+function renderStepperSidebar() {
+  const list = document.getElementById('step-nav-list');
+  list.innerHTML = '';
+  for (let i = 1; i <= totalSteps; i++) {
+    const item = document.createElement('div');
+    item.className = 'step-nav-item' + (i === currentStep ? ' active' : i < currentStep ? ' done' : '');
+    // Allow clicking completed or current steps
+    if (i <= currentStep) {
+      item.onclick = () => { currentStep = i; renderStep(); };
+    }
+    item.innerHTML = `
+      <div class="step-nav-num">
+        <span class="num-text">${i}</span>
+        <svg class="check-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="2"><polyline points="2.5 7.5 5.5 10.5 11.5 4.5"/></svg>
+      </div>
+      <span class="step-nav-label">${stepMeta[i-1].label}</span>
+    `;
+    list.appendChild(item);
+  }
+
+  // Update header
+  document.getElementById('modal-title').textContent = stepMeta[currentStep - 1].title;
+  document.getElementById('modal-subtitle').textContent = stepMeta[currentStep - 1].subtitle;
+}
+
+/* ============================================================
+   STEP RENDERERS
+   ============================================================ */
+function renderStep() {
+  renderStepperSidebar();
+  const body = document.getElementById('modal-body');
+  const footer = document.getElementById('modal-footer');
+  body.innerHTML = '';
+  footer.innerHTML = '';
+
+  getSelectedLibrary();
+  body.classList.remove('step4-body');
+
+  switch (currentStep) {
+    case 1: renderStep1(body, footer); break;
+    case 2: renderStep2(body, footer); break;
+    case 3: renderStep3_combined(body, footer); break;
+    case 4: renderStep5_confirm(body, footer); break;
+  }
+}
+
+/* ---------- STEP 1: Name, Library, Upload ---------- */
+// --- Multi-select state ---
+const libraryOptions = [
+  { value: 'master-brand', label: 'Master Brand Library' },
+  { value: 'product-marketing', label: 'Product Marketing Library' },
+  { value: 'customer-success', label: 'Customer Success Library' },
+  { value: 'internal-comms', label: 'Internal Communications Library' },
+  { value: 'events', label: 'Events & Webinars Library' },
+];
+let selectedLibraries = [];
+let fileUploaded = false;
+
+function renderStep1(body, footer) {
+  body.innerHTML = `<div class="fade-content">
+    <div class="form-group">
+      <label class="form-label">Checklist name <span style="color:var(--error-500);">*</span></label>
+      <input class="form-input" id="checklist-name" type="text" placeholder="e.g., Brand Compliance — Email Standards" value="${escapeHtml(savedChecklistName)}" oninput="onChecklistNameInput(this)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Library <span style="color:var(--error-500);">*</span></label>
+      <div class="multi-select-wrap" id="lib-multi-select">
+        <div class="multi-select-trigger" id="lib-ms-trigger" onclick="toggleLibDropdown(event)">
+          <span class="placeholder" id="lib-ms-placeholder">Select one or more libraries…</span>
+          <svg class="chevron-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 7l5 5 5-5"/></svg>
+        </div>
+        <div class="ms-dropdown" id="lib-ms-dropdown"></div>
+      </div>
+      <p style="font-size:12px; color:var(--ivory-400); margin-top:var(--sp-xxs);">This checklist will apply to emails using the selected libraries</p>
+    </div>
+    <div class="form-group">
+      <div style="display:flex; align-items:baseline; justify-content:space-between;">
+        <label class="form-label" style="margin-bottom:0; display:inline-flex; align-items:center;">Upload rules document <span style="color:var(--error-500); margin-left:2px;">*</span>
+          <span class="info-icon-wrap">
+            <svg class="info-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 11V7.5"/><circle cx="8" cy="5.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+            <span class="info-tooltip"><strong>CSV</strong> — Best accuracy. Use our template for ideal results. <strong>PDF</strong> — Structured tables work best. <strong>Markdown</strong> — Use numbered/bulleted lists. We recommend the CSV template.</span>
+          </span>
+        </label>
+        <a href="#" onclick="downloadTemplate(event)" style="font-size:12px; font-weight:500; color:var(--teal-600); text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 2v7.5"/><path d="M4 7l3 3 3-3"/><path d="M2 11.5v1h10v-1"/></svg>
+          Download CSV template
+        </a>
+      </div>
+      <div class="upload-zone" id="upload-zone" onclick="simulateUpload()" style="margin-top:var(--sp-sm);">
+        <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 26V14"/><path d="M14 18l6-6 6 6"/><rect x="6" y="28" width="28" height="2" rx="1"/></svg>
+        <p>Drag and drop your file here, or <span class="upload-cta">Browse</span></p>
+        <p style="font-size:12px; color:var(--ivory-400); margin-top:4px;">CSV, PDF, or Markdown accepted</p>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:var(--sp-xl);">
+      <button type="button" id="add-rules-toggle" onclick="toggleAdditionalRules()" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--teal-600); background:none; border:none; cursor:pointer; padding:0;">
+        <svg id="add-rules-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.2s;"><line x1="8" y1="4" x2="8" y2="12"/><line x1="4" y1="8" x2="12" y2="8"/></svg>
+        Add additional rules manually
+      </button>
+      <div id="additional-rules-area" style="display:none; margin-top:var(--sp-lg);">
+        <textarea class="form-input form-textarea" placeholder="Type or paste additional rules here, one per line..." oninput="validateStep1()" style="min-height:80px;"></textarea>
+        <p style="font-size:12px; color:var(--ivory-400); margin-top:var(--sp-xs);">These will be added alongside the rules from your uploaded file.</p>
+      </div>
+    </div>
+  </div>`;
+
+  footer.innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    <button class="btn btn-primary" id="btn-step1-continue" onclick="goNext()" disabled>Continue</button>
+  `;
+
+  renderLibDropdownOptions();
+  renderLibChips();
+  validateStep1();
+}
+
+function toggleAdditionalRules() {
+  const area = document.getElementById('additional-rules-area');
+  const icon = document.getElementById('add-rules-icon');
+  const toggle = document.getElementById('add-rules-toggle');
+  if (!area) return;
+  const isHidden = area.style.display === 'none';
+  area.style.display = isHidden ? 'block' : 'none';
+  icon.style.transform = isHidden ? 'rotate(45deg)' : '';
+  toggle.querySelector('svg + text, svg ~ *');
+  // Update label text
+  const textNode = toggle.childNodes[toggle.childNodes.length - 1];
+  if (textNode) textNode.textContent = isHidden ? ' Hide additional rules' : ' Add additional rules manually';
+  if (isHidden) area.querySelector('textarea').focus();
+}
+
+function downloadTemplate(e) {
+  e.preventDefault();
+  const csv = 'Rule Name,Category,Type,Severity\nAlt text required on all images,Accessibility,AI,Blocker\nSubject line under 60 characters,Deliverability,AI,Blocker\n';
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'checklist-rules-template.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function simulateUpload() {
+  const zone = document.getElementById('upload-zone');
+  if (!zone) return;
+
+  // Update zone to uploaded state
+  zone.style.borderColor = 'var(--success-400)';
+  zone.style.background = 'var(--success-25)';
+  zone.style.borderStyle = 'solid';
+  zone.innerHTML = `
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="margin-bottom:8px;">
+      <circle cx="18" cy="18" r="18" fill="var(--success-50)"/>
+      <path d="M12 18.5L16 22.5L24 14.5" stroke="var(--success-500)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p style="font-size:14px; font-weight:600; color:var(--ivory-800);">brand-email-standards.csv</p>
+    <p style="font-size:12px; color:var(--ivory-400); margin-top:2px;">Uploaded successfully · <span style="color:var(--teal-600); cursor:pointer; font-weight:500;" onclick="event.stopPropagation(); replaceFile();">Replace file</span></p>
+  `;
+  zone.style.cursor = 'default';
+  zone.onclick = null;
+
+  // Show confirmation message below upload zone
+  let msg = document.getElementById('upload-confirmation');
+  if (!msg) {
+    msg = document.createElement('div');
+    msg.id = 'upload-confirmation';
+    msg.style.cssText = 'display:flex; align-items:center; gap:8px; margin-top:var(--sp-md); padding:var(--sp-md) var(--sp-lg); background:var(--success-25); border:1px solid var(--success-100); border-radius:var(--r-md); font-size:13px; color:var(--success-500); font-weight:500; animation:fadeIn 0.25s ease;';
+    msg.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--success-500)" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M5.5 8.5L7 10l3.5-4"/></svg>
+      <span>${sampleRules.length} rules detected — click <strong>Continue</strong> to review and categorize them</span>
+    `;
+    zone.parentNode.insertBefore(msg, zone.nextSibling);
+  }
+
+  fileUploaded = true;
+  validateStep1();
+}
+
+function replaceFile() {
+  const zone = document.getElementById('upload-zone');
+  if (!zone) return;
+  zone.style.borderColor = '';
+  zone.style.background = '';
+  zone.style.borderStyle = 'dashed';
+  zone.style.cursor = 'pointer';
+  zone.innerHTML = `
+    <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 26V14"/><path d="M14 18l6-6 6 6"/><rect x="6" y="28" width="28" height="2" rx="1"/></svg>
+    <p>Drag and drop your file here, or <span class="upload-cta">Browse</span></p>
+    <p style="font-size:12px; color:var(--ivory-400); margin-top:4px;">CSV, PDF, or Markdown accepted</p>
+  `;
+  zone.onclick = simulateUpload;
+  const msg = document.getElementById('upload-confirmation');
+  if (msg) msg.remove();
+  fileUploaded = false;
+  validateStep1();
+}
+
+
+const checkSvg = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg>';
+const chevronSvg = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>';
+
+function renderComplianceRule(rule) {
+  const checked = rule.disabled ? '' : 'checked';
+  const opacity = rule.disabled ? ' style="opacity:0.5"' : '';
+  const hasChecklists = getChecklistCount() > 0;
+  const merged = (rule.merged && hasChecklists) ? '<span class="merged-tag">Merged from upload</span>' : '';
+  return `<div class="comp-rule-row"${opacity}>
+    <div class="comp-checkbox ${checked}" onclick="toggleComplianceCheck(this)">${checkSvg}</div>
+    <span class="comp-rule-name">${rule.name}</span>
+    ${merged}
+    <span class="comp-rule-type">${rule.type === 'deterministic' ? 'Deterministic' : 'AI'}</span>
+  </div>`;
+}
+
+function enabledCount(mod) {
+  return mod.rules.filter(r => !r.disabled).length;
+}
+
+let isComplianceSectionExpanded = true;
+
+const shieldSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>';
+
+function getChecklistCount() {
+  const list = document.getElementById('screen-list');
+  if (!list || list.classList.contains('hidden')) return 0;
+  const tbody = document.getElementById('checklist-tbody');
+  return tbody ? tbody.children.length : 0;
+}
+
+function renderComplianceModules() {
+  const listEl = document.getElementById('compliance-module-list');
+  if (!listEl) return;
+
+  const total = complianceModules.length;
+  const on = complianceModules.filter(m => m.enabled).length;
+  const clCount = getChecklistCount();
+
+  // Universal summary row — represents both compliance frameworks and checklists
+  const enabledMods = complianceModules.filter(m => m.enabled);
+  const chips = enabledMods.length
+    ? enabledMods.map(m => `<span class="comp-summary-chip">${m.label}</span>`).join('')
+    : `<span class="comp-summary-empty">No rules enabled</span>`;
+
+  const clLabel = `${clCount} ${clCount === 1 ? 'checklist' : 'checklists'}`;
+  const countText = `${on} of ${total} frameworks · ${clLabel}`;
+
+  const summaryRowHtml = `
+    <div class="comp-summary-row">
+      <div class="comp-summary-info">
+        <span class="comp-summary-label">Rules</span>
+        <div class="comp-summary-chips">${chips}</div>
+      </div>
+      <span class="comp-summary-count">${countText}</span>
+    </div>
+  `;
+
+  // Update the static Checklists card meta + visibility
+  const checklistsCard = document.getElementById('checklists-card');
+  const checklistsMeta = document.getElementById('checklists-meta');
+  if (checklistsMeta) checklistsMeta.textContent = clCount === 0 ? 'No checklists yet' : clLabel;
+  if (checklistsCard) checklistsCard.style.display = '';
+
+  // Expanded: summary row at top + compliance modules (each module collapsed by default)
+  const modulesHtml = complianceModules.map(mod => {
+    const isOn = mod.enabled;
+    const expandedClass = mod.expanded ? ' expanded' : '';
+    const enabledClass = isOn ? ' enabled' : '';
+    const metaText = isOn ? `${enabledCount(mod)} of ${mod.rules.length} enabled` : `${mod.rules.length} rules`;
+
+    return `<div class="compliance-module cm-${mod.cssClass}${enabledClass}${expandedClass}" data-module-id="${mod.id}">
+      <div class="compliance-module-header" onclick="toggleComplianceExpand('${mod.id}')">
+        <div class="cm-icon">${mod.icon}</div>
+        <div class="cm-info"><div class="cm-name">${mod.fullName}<span class="cm-pill">Pre-Built</span></div><div class="cm-desc">${mod.desc}</div></div>
+        <span class="cm-meta">${metaText}</span>
+        <div class="toggle-switch${isOn ? ' on' : ''}" onclick="event.stopPropagation(); toggleComplianceModule(this, '${mod.id}')"></div>
+        <svg class="cm-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
+      </div>
+      <div class="cm-body"><div class="cm-body-inner">${mod.rules.map(renderComplianceRule).join('')}</div></div>
+    </div>`;
+  }).join('');
+
+  listEl.innerHTML = summaryRowHtml + modulesHtml;
+}
+
+function toggleChecklistsCard() {
+  const card = document.getElementById('checklists-card');
+  if (!card) return;
+  card.classList.toggle('expanded');
+}
+
+// Section is always expanded — no toggle needed
+
+// Initialize compliance modules on Governance homepage
+document.addEventListener('DOMContentLoaded', renderComplianceModules);
+
+function toggleComplianceModule(toggleEl, moduleId) {
+  const mod = complianceModules.find(m => m.id === moduleId);
+  if (!mod) return;
+  mod.enabled = !mod.enabled;
+  renderComplianceModules();
+}
+
+function toggleComplianceExpand(moduleId) {
+  const mod = complianceModules.find(m => m.id === moduleId);
+  if (!mod) return;
+  mod.expanded = !mod.expanded;
+  const moduleEl = document.querySelector(`.compliance-module[data-module-id="${moduleId}"]`);
+  if (moduleEl) {
+    moduleEl.classList.toggle('expanded');
+  }
+}
+
+function toggleComplianceCheck(el) {
+  el.classList.toggle('checked');
+}
+
+function onChecklistNameInput(el) {
+  savedChecklistName = el.value;
+  validateStep1();
+}
+
+function validateStep1() {
+  const nameInput = document.getElementById('checklist-name');
+  const btn = document.getElementById('btn-step1-continue');
+  if (nameInput) savedChecklistName = nameInput.value;
+  if (!btn) return;
+
+  const hasName = savedChecklistName.trim().length > 0;
+  const hasLibrary = selectedLibraries.length > 0;
+  const hasFile = fileUploaded;
+
+  btn.disabled = !(hasName && hasLibrary && hasFile);
+}
+
+// --- Multi-select dropdown logic ---
+function renderLibDropdownOptions() {
+  const dropdown = document.getElementById('lib-ms-dropdown');
+  if (!dropdown) return;
+
+  const allSelected = selectedLibraries.length === libraryOptions.length;
+
+  let html = `<div class="ms-option select-all ${allSelected ? 'selected' : ''}" onclick="toggleSelectAll(event)">
+    <div class="ms-check">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg>
+    </div>
+    Select all
+  </div>
+  <div class="ms-divider"></div>`;
+
+  html += libraryOptions.map(opt => {
+    const isSelected = selectedLibraries.includes(opt.value);
+    return `<div class="ms-option ${isSelected ? 'selected' : ''}" onclick="toggleLibOption(event, '${opt.value}')">
+      <div class="ms-check">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2"><polyline points="2 6 5 9 10 3"/></svg>
+      </div>
+      ${opt.label}
+    </div>`;
+  }).join('');
+
+  const count = selectedLibraries.length;
+  const countLabel = count === 0 ? 'None selected' : count === 1 ? '1 library selected' : `${count} libraries selected`;
+  html += `<div class="ms-footer">
+    <span class="ms-count">${countLabel}</span>
+    <button class="ms-done-btn" onclick="closeLibDropdown()">Done</button>
+  </div>`;
+
+  dropdown.innerHTML = html;
+}
+
+function renderLibChips() {
+  const trigger = document.getElementById('lib-ms-trigger');
+  const placeholder = document.getElementById('lib-ms-placeholder');
+  if (!trigger) return;
+
+  // Remove existing chips
+  trigger.querySelectorAll('.ms-chip').forEach(c => c.remove());
+
+  if (selectedLibraries.length === 0) {
+    if (placeholder) placeholder.style.display = '';
+  } else {
+    if (placeholder) placeholder.style.display = 'none';
+    const chevron = trigger.querySelector('.chevron-icon');
+    selectedLibraries.forEach(val => {
+      const opt = libraryOptions.find(o => o.value === val);
+      if (!opt) return;
+      const chip = document.createElement('span');
+      chip.className = 'ms-chip';
+      chip.innerHTML = `${opt.label}<span class="ms-chip-remove" onclick="removeLibChip(event, '${val}')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg></span>`;
+      trigger.insertBefore(chip, chevron);
+    });
+  }
+}
+
+function toggleLibDropdown(e) {
+  e.stopPropagation();
+  // Don't toggle if clicking a chip remove button
+  if (e.target.closest('.ms-chip-remove')) return;
+  const trigger = document.getElementById('lib-ms-trigger');
+  const dropdown = document.getElementById('lib-ms-dropdown');
+  const isOpen = dropdown.classList.contains('open');
+  closeLibDropdown();
+  if (!isOpen) {
+    trigger.classList.add('open');
+    dropdown.classList.add('open');
+  }
+}
+
+function closeLibDropdown() {
+  const trigger = document.getElementById('lib-ms-trigger');
+  const dropdown = document.getElementById('lib-ms-dropdown');
+  if (trigger) trigger.classList.remove('open');
+  if (dropdown) dropdown.classList.remove('open');
+}
+
+function toggleLibOption(e, value) {
+  e.stopPropagation();
+  const idx = selectedLibraries.indexOf(value);
+  if (idx >= 0) {
+    selectedLibraries.splice(idx, 1);
+  } else {
+    selectedLibraries.push(value);
+  }
+  renderLibDropdownOptions();
+  renderLibChips();
+  validateStep1();
+}
+
+function toggleSelectAll(e) {
+  e.stopPropagation();
+  if (selectedLibraries.length === libraryOptions.length) {
+    selectedLibraries = [];
+  } else {
+    selectedLibraries = libraryOptions.map(o => o.value);
+  }
+  renderLibDropdownOptions();
+  renderLibChips();
+  validateStep1();
+}
+
+function removeLibChip(e, value) {
+  e.stopPropagation();
+  selectedLibraries = selectedLibraries.filter(v => v !== value);
+  renderLibDropdownOptions();
+  renderLibChips();
+  validateStep1();
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#lib-multi-select')) {
+    closeLibDropdown();
+  }
+});
+
+function getSelectedLibrary() {
+  if (selectedLibraries.length === 0) return 'Not selected';
+  if (selectedLibraries.length === libraryOptions.length) return 'All libraries';
+  return selectedLibraries.map(v => {
+    const opt = libraryOptions.find(o => o.value === v);
+    return opt ? opt.label : v;
+  }).join(', ');
+}
+
+/* ---------- STEP 2: Review & Categorize ---------- */
+function renderStep2(body, footer) {
+  // Rules that are currently "in" the uploaded-rules main list:
+  //  - not in overlap map OR
+  //  - user decided to keep their own version after review.
+  const visibleRules = sampleRules.filter(r => {
+    if (!overlapRuleIds.includes(r.id)) return true;
+    return ruleMergeStatus[r.id] === 'kept';
+  });
+  const mergedRules = sampleRules.filter(r =>
+    overlapRuleIds.includes(r.id) && ruleMergeStatus[r.id] === 'merged'
+  );
+
+  let itemsHtml = visibleRules.map((r, i) => {
+    if (r.manualOnly) {
+      return `<div class="item-row">
+        <span class="item-num">${i + 1}</span>
+        <div class="item-text">
+          ${r.name}
+          <div class="manual-only-hint">${r.manualReason}</div>
+        </div>
+        <div class="manual-only-badge">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2" fill="currentColor" stroke="none"/></svg>
+          Manual only
+        </div>
+      </div>`;
+    }
+    return `<div class="item-row">
+      <span class="item-num">${i + 1}</span>
+      <span class="item-text">${r.name}</span>
+      <div class="segment-control">
+        <span class="segment-tooltip"><strong>AI</strong> — Checked automatically during QA. <strong>Manual</strong> — Requires a human reviewer to verify.</span>
+        <span class="segment-opt ${r.type==='ai'?'active-ai':''}" onclick="toggleType(this,'ai')">AI</span>
+        <span class="segment-opt ${r.type==='manual'?'active-manual':''}" onclick="toggleType(this,'manual')">Manual</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const aiCount = visibleRules.filter(r => r.type === 'ai').length;
+  const manualCount = visibleRules.filter(r => r.type === 'manual').length;
+
+  body.innerHTML = `<div class="fade-content">
+    ${renderOverlapBanner()}
+    <div class="item-summary">
+      <span><strong>${visibleRules.length}</strong> items total</span>
+      <span><strong id="ai-count">${aiCount}</strong> marked for AI</span>
+      <span><strong id="manual-count">${manualCount}</strong> manual checks</span>
+    </div>
+    <div class="uploaded-section-header">
+      <div class="uploaded-section-title">Your uploaded rules <span class="count-chip">${visibleRules.length}</span></div>
+    </div>
+    <div class="item-list">${itemsHtml}</div>
+    ${renderMergedSection(mergedRules)}
+  </div>`;
+
+  footer.innerHTML = `
+    <button class="btn btn-secondary" onclick="goBack()">Back</button>
+    <button class="btn btn-primary" onclick="processAndAdvance()">Next</button>
+  `;
+}
+
+/* ============================================================
+   OVERLAP BANNER — render & interactions
+   ============================================================ */
+function renderOverlapBanner() {
+  // How many overlaps are still awaiting a decision?
+  const unresolved = overlapRuleIds.filter(id => !ruleMergeStatus[id]);
+  const mergedCount = overlapRuleIds.filter(id => ruleMergeStatus[id] === 'merged').length;
+  const keptCount   = overlapRuleIds.filter(id => ruleMergeStatus[id] === 'kept').length;
+
+  // State resolution
+  if (unresolved.length === 0 && overlapBannerState !== 'collapsed') {
+    overlapBannerState = 'resolved';
+  }
+
+  // --- RESOLVED (all overlaps decided) ---
+  if (overlapBannerState === 'resolved') {
+    const parts = [];
+    if (mergedCount) parts.push(`<strong>${mergedCount}</strong> rule${mergedCount===1?'':'s'} merged with WCAG — Accessibility`);
+    if (keptCount)   parts.push(`<strong>${keptCount}</strong> kept as your version`);
+    const summary = parts.join(', ');
+    return `
+      <div class="overlap-banner resolved">
+        <div class="overlap-row">
+          <span class="overlap-icon">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="10" cy="10" r="8"/>
+              <polyline points="6 10 9 13 14 7"/>
+            </svg>
+          </span>
+          <span class="overlap-text">Resolved — ${summary}.</span>
+          <button class="overlap-link" onclick="undoOverlapResolution()">Undo</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // --- COLLAPSED default warning ---
+  if (overlapBannerState === 'collapsed') {
+    return `
+      <div class="overlap-banner">
+        <div class="overlap-row">
+          <span class="overlap-icon">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.67L.83 17.5h18.34L10 1.67zm0 5.83c.46 0 .83.37.83.83v3.34a.83.83 0 01-1.66 0V8.33c0-.46.37-.83.83-.83zm0 6.67a1 1 0 110 2 1 1 0 010-2z"/></svg>
+          </span>
+          <span class="overlap-text">
+            <strong>${overlapRuleIds.length} rules overlap</strong> with WCAG checks. Using the platform version gives more reliable automated validation.
+          </span>
+          <button class="overlap-cta" onclick="expandOverlapBanner()">Review &amp; Merge</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // --- EXPANDED inline review panel ---
+  const cardsHtml = overlapRuleIds
+    .filter(id => !ruleMergeStatus[id]) // only rules still awaiting decision
+    .map(id => {
+      const o = overlapMap[id];
+      const sel = pendingMergeSelection[id] || 'wcag';
+      return `
+        <div class="overlap-card">
+          <div class="overlap-card-title">${o.uploadedName}</div>
+          <div class="overlap-choice ${sel==='yours'?'selected':''}" onclick="selectMergeChoice(${id},'yours')">
+            <span class="overlap-radio"></span>
+            <div class="overlap-choice-body">
+              <div class="overlap-choice-label">Your version</div>
+              <div class="overlap-choice-desc">${o.uploadedDesc}</div>
+            </div>
+          </div>
+          <div class="overlap-choice ${sel==='wcag'?'selected':''}" onclick="selectMergeChoice(${id},'wcag')">
+            <span class="overlap-radio"></span>
+            <div class="overlap-choice-body">
+              <div class="overlap-choice-label">
+                WCAG version
+                <span class="recommended-chip">Recommended</span>
+              </div>
+              <div class="overlap-choice-desc">${o.wcagDesc}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  return `
+    <div class="overlap-banner expanded">
+      <div class="overlap-row">
+        <span class="overlap-icon">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.67L.83 17.5h18.34L10 1.67zm0 5.83c.46 0 .83.37.83.83v3.34a.83.83 0 01-1.66 0V8.33c0-.46.37-.83.83-.83zm0 6.67a1 1 0 110 2 1 1 0 010-2z"/></svg>
+        </span>
+        <span class="overlap-text">
+          <strong>Resolve overlapping rules</strong>
+        </span>
+      </div>
+      <div class="overlap-panel">
+        <div class="overlap-panel-desc">
+          These uploaded rules match existing WCAG checks. Choose which version to keep — the platform version provides more reliable automated validation.
+        </div>
+        ${cardsHtml}
+        <div class="overlap-panel-actions">
+          <button class="overlap-btn-cancel" onclick="cancelOverlapReview()">Cancel</button>
+          <button class="overlap-btn-apply" onclick="applyOverlapSelections()">Apply Selections</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMergedSection(mergedRules) {
+  if (!mergedRules.length) return '';
+  const openClass = mergedSectionOpen ? 'open' : '';
+  const rowsHtml = mergedRules.map(r => {
+    const o = overlapMap[r.id];
+    return `
+      <div class="merged-row">
+        <svg class="merged-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="8" cy="8" r="6.5"/>
+          <polyline points="5 8 7 10 11 6"/>
+        </svg>
+        <span class="merged-name">${o.wcagName}</span>
+        <span class="merged-source">via WCAG platform</span>
+        <button class="merged-unmerge-btn" onclick="unmergeRule(${r.id})">Unmerge</button>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="merged-section ${openClass}">
+      <div class="merged-section-header" onclick="toggleMergedSection()">
+        <div class="merged-section-title">
+          Merged into WCAG — Accessibility
+          <span class="count-chip">${mergedRules.length}</span>
+        </div>
+        <svg class="merged-section-caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 6 8 10 12 6"/>
+        </svg>
+      </div>
+      <div class="merged-list">${rowsHtml}</div>
+    </div>
+  `;
+}
+
+function expandOverlapBanner() {
+  overlapBannerState = 'expanded';
+  // seed pending selections to "wcag" for any awaiting-decision rules
+  overlapRuleIds.forEach(id => {
+    if (!ruleMergeStatus[id] && !pendingMergeSelection[id]) {
+      pendingMergeSelection[id] = 'wcag';
+    }
+  });
+  renderStep();
+}
+function cancelOverlapReview() {
+  overlapBannerState = 'collapsed';
+  renderStep();
+}
+function selectMergeChoice(ruleId, which) {
+  pendingMergeSelection[ruleId] = which;
+  renderStep();
+}
+function applyOverlapSelections() {
+  overlapRuleIds.forEach(id => {
+    if (ruleMergeStatus[id]) return; // already decided in a previous pass
+    const choice = pendingMergeSelection[id] || 'wcag';
+    ruleMergeStatus[id] = (choice === 'wcag') ? 'merged' : 'kept';
+  });
+  overlapBannerState = 'resolved';
+  renderStep();
+}
+function undoOverlapResolution() {
+  ruleMergeStatus = {};
+  overlapRuleIds.forEach(id => { pendingMergeSelection[id] = 'wcag'; });
+  overlapBannerState = 'collapsed';
+  renderStep();
+}
+function unmergeRule(ruleId) {
+  ruleMergeStatus[ruleId] = 'kept';
+  // if there are any rules still undecided, banner stays resolved (all previously decided)
+  // the rule re-appears in the main uploaded list
+  renderStep();
+}
+function toggleMergedSection() {
+  mergedSectionOpen = !mergedSectionOpen;
+  renderStep();
+}
+
+function processAndAdvance() {
+  const body = document.getElementById('modal-body');
+  const footer = document.getElementById('modal-footer');
+  body.innerHTML = `<div class="ai-processing fade-content">
+    <div class="spinner"></div>
+    <div class="ai-status" id="ai-status">Reading your uploaded rules...</div>
+    <div class="ai-detail" id="ai-detail">Parsing document content</div>
+    <div class="ai-progress-bar"><div class="ai-progress-fill" id="ai-progress" style="width:0%"></div></div>
+  </div>`;
+  footer.innerHTML = `<div style="flex:1; text-align:center; font-size:13px; color:var(--ivory-400);">Setting up your rules…</div>`;
+  document.getElementById('modal-title').textContent = 'Setting Up Rules';
+  document.getElementById('modal-subtitle').textContent = 'Configuring your checklist rules...';
+
+  const messages = [
+    { p: 20, s: 'Organizing rules by category...', d: 'Grouping related checks together' },
+    { p: 45, s: 'Configuring validation criteria...', d: 'Setting up pass/fail conditions' },
+    { p: 70, s: 'Mapping rules to email elements...', d: 'Linking checks to content areas' },
+    { p: 90, s: 'Finalizing rule setup...', d: 'Almost done' },
+    { p: 100, s: 'Complete!', d: '8 rules configured successfully' },
+  ];
+  let msgIdx = 0;
+  const interval = setInterval(() => {
+    if (msgIdx < messages.length) {
+      document.getElementById('ai-progress').style.width = messages[msgIdx].p + '%';
+      document.getElementById('ai-status').textContent = messages[msgIdx].s;
+      document.getElementById('ai-detail').textContent = messages[msgIdx].d;
+      msgIdx++;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => { currentStep = 3; renderStep(); }, 400);
+    }
+  }, 700);
+}
+
+function toggleType(el, type) {
+  const control = el.parentElement;
+  control.querySelectorAll('.segment-opt').forEach(o => { o.classList.remove('active-ai','active-manual'); });
+  el.classList.add(type === 'ai' ? 'active-ai' : 'active-manual');
+  updateSummaryCounts();
+}
+
+function updateSummaryCounts() {
+  const aiCount = document.querySelectorAll('.segment-opt.active-ai').length;
+  const manualCount = document.querySelectorAll('.segment-opt.active-manual').length;
+  const aiEl = document.getElementById('ai-count');
+  const manualEl = document.getElementById('manual-count');
+  if (aiEl) aiEl.textContent = aiCount;
+  if (manualEl) manualEl.textContent = manualCount;
+}
+
+/* ---------- STEP 3: Rules & Severity (combined) ---------- */
+function renderStep3_combined(body, footer) {
+  let rulesHtml = sampleRules.map((r, i) => `
+    <tr data-rule-index="${i}">
+      <td style="font-weight:500;">${r.name}</td>
+      <td><span class="rule-type-badge ${r.type==='ai'?'rule-ai':'rule-manual'}">${r.type==='ai'?'AI':'Manual'}</span></td>
+      <td>
+        <div class="severity-toggle">
+          <span class="severity-tooltip">
+            <p><span class="sev-label-blocker">Blocker</span> — Email can't be completed in the builder until this rule passes.</p>
+            <p><span class="sev-label-suggestion">Suggestion</span> — Flagged in the builder as a recommendation; users can still complete the email.</p>
+          </span>
+          <span class="severity-opt ${r.severity==='blocker'?'sev-blocker':''}" onclick="setSeverity(this,'blocker')">Blocker</span>
+          <span class="severity-opt ${r.severity==='suggestion'?'sev-suggestion':''}" onclick="setSeverity(this,'suggestion')">Suggestion</span>
+        </div>
+      </td>
+      <td>
+        <div class="more-menu-wrap">
+          <button class="more-btn" onclick="toggleContextMenu(event, this)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+          </button>
+          <div class="context-menu">
+            <button class="context-menu-item" onclick="editRule(${i}); closeAllMenus();">Edit</button>
+            <button class="context-menu-item destructive" onclick="deleteRule(${i}); closeAllMenus();">Delete</button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  const blockers = sampleRules.filter(r => r.severity === 'blocker').length;
+  const suggestions = sampleRules.filter(r => r.severity === 'suggestion').length;
+
+  body.innerHTML = `<div class="fade-content">
+    <div style="display:flex; align-items:center; gap:var(--sp-xl); margin-bottom:var(--sp-xl);">
+      <span style="font-size:13px; color:var(--ivory-500);"><strong style="color:var(--ivory-700);">${sampleRules.length}</strong> rules configured</span>
+      <div class="severity-summary-inline">
+        <span><strong class="blocker-count" id="sev-blocker-count">${blockers}</strong> Blockers</span>
+        <span><strong class="suggestion-count" id="sev-suggestion-count">${suggestions}</strong> Suggestions</span>
+      </div>
+    </div>
+    <table class="rules-table">
+      <thead><tr><th>Rule name</th><th>Type</th><th>Severity</th><th style="width:44px;"></th></tr></thead>
+      <tbody>${rulesHtml}</tbody>
+    </table>
+  </div>`;
+
+  footer.innerHTML = `
+    <button class="btn btn-secondary" onclick="goBack()">Back</button>
+    <button class="btn btn-primary" onclick="goNext()">Review Checklist</button>
+  `;
+}
+
+function toggleContextMenu(e, btn) {
+  e.stopPropagation();
+  const menu = btn.nextElementSibling;
+  const wasOpen = menu.classList.contains('open');
+  closeAllMenus();
+  if (!wasOpen) menu.classList.add('open');
+}
+function closeAllMenus() {
+  document.querySelectorAll('.context-menu.open').forEach(m => m.classList.remove('open'));
+}
+function editRule(index) {
+  const rule = sampleRules[index];
+  if (rule) alert('Edit rule: ' + rule.name);
+}
+function deleteRule(index) {
+  const row = document.querySelector('tr[data-rule-index="' + index + '"]');
+  if (row) {
+    row.style.transition = 'opacity 0.2s ease';
+    row.style.opacity = '0';
+    setTimeout(() => { row.remove(); }, 200);
+  }
+}
+document.addEventListener('click', closeAllMenus);
+
+/* ---------- STEP 4: Test Run ---------- */
+const emailPreviews = {
+  'Spring Sale — March 2026 Campaign': {
+    banner: { bg: 'linear-gradient(135deg, #e53e3e, #ed8936)', text: 'SPRING SALE — UP TO 40% OFF' },
+    heading: 'Spring into Savings',
+    body: 'Our biggest spring sale is here! Enjoy up to 40% off on selected items across all categories. From home essentials to fashion must-haves — refresh your style this season.',
+    cta: { text: 'Shop the Sale', bg: '#e53e3e' },
+    footer: 'Offer valid through March 31, 2026. Terms and conditions apply. Unsubscribe | Privacy Policy'
+  },
+  'Product Launch — New Feature Announcement': {
+    banner: { bg: 'linear-gradient(135deg, #3182ce, #805ad5)', text: 'INTRODUCING SMART COMPOSE' },
+    heading: 'Meet Smart Compose',
+    body: 'We\'re excited to announce Smart Compose — our new AI-powered writing assistant that helps you draft emails faster. Available now for all Pro and Enterprise customers.',
+    cta: { text: 'Try It Now', bg: '#3182ce' },
+    footer: 'You\'re receiving this because you opted into product updates. Unsubscribe | Privacy Policy'
+  },
+  'Weekly Newsletter — Week 13': {
+    banner: { bg: 'linear-gradient(135deg, #2d9c6f, #38a169)', text: 'WEEKLY DIGEST — WEEK 13' },
+    heading: 'This Week\'s Highlights',
+    body: 'Catch up on what you missed: 3 new integrations shipped, a recap of our webinar on email deliverability, and tips for improving open rates heading into Q2.',
+    cta: { text: 'Read More', bg: '#2d9c6f' },
+    footer: 'Sent weekly on Mondays. Manage preferences | Unsubscribe | Privacy Policy'
+  }
+};
+
+const ruleSectionMap = [
+  { section: 'banner',  type: 'visible', label: 'Images missing alt text' },
+  { section: 'subject', type: 'visible', label: 'Subject line too long' },
+  { section: 'footer',  type: 'visible', label: 'Unsubscribe link issue' },
+  { section: 'cta',     type: 'visible', label: 'CTA contrast issue' },
+  { section: 'banner',  type: 'visible', label: 'Broken image link detected' },
+  { section: 'subject', type: 'missing', label: 'Preheader text missing or too long' },
+  { section: 'header',  type: 'missing', label: 'Brand logo not found in header' },
+  { section: 'footer',  type: 'visible', label: 'Legal disclaimer mismatch' },
+];
+
+function getEmailThumbnailHtml(emailName) {
+  const e = emailPreviews[emailName];
+  if (!e) return '';
+  return `
+    <div class="email-thumbnail">
+      <div class="email-thumb-header"><span>Email Preview</span></div>
+      <div class="email-thumb-body">
+        <div data-section="header"></div>
+        <div data-section="subject" style="display:none;"></div>
+        <div data-section="banner" class="email-banner" style="background:${e.banner.bg};">${e.banner.text}</div>
+        <h3>${e.heading}</h3>
+        <p>${e.body}</p>
+        <a data-section="cta" class="email-cta" style="background:${e.cta.bg};">${e.cta.text}</a>
+        <div data-section="footer" class="email-footer-text">${e.footer}</div>
+      </div>
+    </div>`;
+}
+
+function onEmailSelect(sel) {
+  const thumb = document.getElementById('email-thumb-container');
+  if (thumb) thumb.innerHTML = getEmailThumbnailHtml(sel.value);
+  resetRulesList();
+  const runBtn = document.getElementById('btn-run-test');
+  const editBtn = document.getElementById('btn-edit-rules');
+  const sevBtn = document.getElementById('btn-set-severity');
+  if (runBtn) runBtn.classList.remove('hidden');
+  if (editBtn) editBtn.classList.add('hidden');
+  if (sevBtn) sevBtn.classList.add('hidden');
+}
+
+function getRulesListHtml() {
+  const indexed = sampleRules.map((r, i) => ({ r, i }));
+  const aiRules = indexed.filter(x => !x.r.manualOnly);
+  const manualRules = indexed.filter(x => x.r.manualOnly);
+
+  const sevBadge = (r) => {
+    const cls = r.severity === 'blocker' ? 'badge-blocker' : 'badge-suggestion';
+    const lbl = r.severity === 'blocker' ? 'Blocker' : 'Suggestion';
+    return `<span class="rule-check-badge ${cls}">${lbl}</span>`;
+  };
+
+  const aiHtml = `<div class="ai-rule-list">` + aiRules.map(({ r, i }) => `
+    <div class="rule-check-row" data-rule-check="${i}">
+      <div class="rule-check-name">${r.name}</div>
+      ${sevBadge(r)}
+    </div>
+  `).join('') + `</div>`;
+
+  let manualHtml = '';
+  if (manualRules.length) {
+    const rows = manualRules.map(({ r, i }) => `
+      <div class="rule-check-row manual-rule" data-rule-check="${i}">
+        <div class="rule-check-name">
+          ${r.name}
+          <div class="rule-check-detail">${r.manualReason || 'Requires human verification'}</div>
+        </div>
+        ${sevBadge(r)}
+      </div>
+    `).join('');
+    manualHtml = `
+      <div class="manual-subsection">
+        <div class="manual-subsection-header">
+          <span class="manual-subsection-title">Manual checks</span>
+          <span class="manual-count-chip">${manualRules.length}</span>
+        </div>
+        <div class="manual-subsection-note">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="7" x2="8" y2="11.5"/><circle cx="8" cy="4.8" r="0.6" fill="currentColor"/></svg>
+          <span>These rules can't be validated automatically. Reviewers will verify them manually inside the email builder.</span>
+        </div>
+        ${rows}
+      </div>
+    `;
+  }
+
+  return aiHtml + manualHtml;
+}
+
+function resetRulesList() {
+  const list = document.getElementById('rules-check-list');
+  if (list) list.innerHTML = getRulesListHtml();
+}
+
+function renderStep4_testRun(body, footer) {
+  const defaultEmail = 'Weekly Newsletter — Week 13';
+  body.innerHTML = `<div class="fade-content">
+    <div class="test-columns">
+      <div class="test-col-left">
+        <div class="email-picker">
+          <select onchange="onEmailSelect(this)">
+            <option>Spring Sale — March 2026 Campaign</option>
+            <option>Product Launch — New Feature Announcement</option>
+            <option selected>Weekly Newsletter — Week 13</option>
+          </select>
+        </div>
+        <div id="email-thumb-container">${getEmailThumbnailHtml(defaultEmail)}</div>
+      </div>
+      <div class="test-col-right">
+        <div class="test-col-title">Checklist Rules (${sampleRules.length})</div>
+        <div class="rule-check-list" id="rules-check-list">${getRulesListHtml()}</div>
+      </div>
+    </div>
+  </div>`;
+
+  footer.innerHTML = `
+    <button class="btn btn-secondary" onclick="goBack()">Back</button>
+    <div style="display:flex; gap:var(--sp-md);">
+      <button class="btn btn-primary" id="btn-run-test" onclick="runTest(this)">Run Test</button>
+      <button class="btn btn-secondary hidden" id="btn-edit-rules" onclick="currentStep=3; renderStep();">Edit Rules</button>
+      <button class="btn btn-primary hidden" id="btn-set-severity" onclick="goNext()">${isEditMode ? 'Review Updated Checklist' : 'Looks Good — Review Checklist'}</button>
+    </div>
+  `;
+}
+
+/* ----------------------------------------------------------------
+   Failure-details map — shown in the inline expand under a failed row.
+   Keyed by sampleRules index.
+   ---------------------------------------------------------------- */
+const failureDetails = {
+  0: { // Alt text required on all images
+    why: 'One or more <img> elements in the email are missing the alt attribute.',
+    element: 'Banner image — header region',
+  },
+  1: { // Subject line under 60 characters
+    why: 'Subject line is 73 characters — exceeds the 60-character limit.',
+    element: 'Subject line',
+  },
+  2: { // Unsubscribe link present in footer
+    why: 'No <a> element in the footer matches recognized unsubscribe link patterns.',
+    element: 'Footer module',
+  },
+  3: { // CTA button contrast ratio ≥ 4.5:1
+    why: 'CTA contrast ratio measured at 3.2:1 — below the required 4.5:1 for body-size text.',
+    element: '"Read More" CTA button',
+  },
+  4: { // No broken image links
+    why: 'Banner image URL returns HTTP 404.',
+    element: 'Hero banner image',
+  },
+  5: { // Preheader text is set and under 90 characters
+    why: 'Preheader text is not set. Inbox previews will fall back to the first line of body copy.',
+    element: 'Preheader field',
+  },
+};
+
+function runTest(btn) {
+  btn.textContent = 'Running...';
+  btn.disabled = true;
+
+  // Only AI (automatable) rules participate in the run.
+  const aiIndices = sampleRules
+    .map((r, i) => ({ r, i }))
+    .filter(x => !x.r.manualOnly)
+    .map(x => x.i);
+
+  // Deterministic-ish pass/fail, keyed by original sampleRules index.
+  const results = {};
+  aiIndices.forEach(i => { results[i] = Math.random() > 0.25; });
+  // Guarantee the demo always shows both a Blocker (red) and a Suggestion (warning yellow).
+  results[2] = false; // Unsubscribe link present in footer — Blocker
+  results[5] = false; // Preheader text is set and under 90 characters — Suggestion
+
+  let k = 0;
+  const interval = setInterval(() => {
+    if (k >= aiIndices.length) {
+      clearInterval(interval);
+      btn.classList.add('hidden');
+      document.getElementById('btn-edit-rules').classList.remove('hidden');
+      document.getElementById('btn-set-severity').classList.remove('hidden');
+      // applyEmailHighlights expects an array-like keyed by original rule index.
+      const resultsArray = sampleRules.map((_, i) => (i in results) ? results[i] : true);
+      applyEmailHighlights(resultsArray);
+      return;
+    }
+    const idx = aiIndices[k];
+    const row = document.querySelector(`[data-rule-check="${idx}"]`);
+    if (row) {
+      const pass = results[idx];
+      const ruleSeverity = sampleRules[idx].severity; // 'blocker' | 'suggestion'
+      // Suggestion failures render as warning (yellow), blocker failures as error (red).
+      let iconSvg;
+      if (pass) {
+        iconSvg = `<svg class="rule-check-icon pass" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z"/></svg>`;
+      } else if (ruleSeverity === 'blocker') {
+        // Red X-in-circle
+        iconSvg = `<svg class="rule-check-icon fail" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.7 7.3a1 1 0 00-1.4 1.4L8.6 10l-1.3 1.3a1 1 0 101.4 1.4L10 11.4l1.3 1.3a1 1 0 001.4-1.4L11.4 10l1.3-1.3a1 1 0 00-1.4-1.4L10 8.6 8.7 7.3z"/></svg>`;
+      } else {
+        // Yellow warning triangle with !
+        iconSvg = `<svg class="rule-check-icon fail-warning" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2L1 18h18L10 2zm0 5a1 1 0 011 1v4a1 1 0 11-2 0V8a1 1 0 011-1zm0 8a1 1 0 110 2 1 1 0 010-2z"/></svg>`;
+      }
+      // Rows no longer have a pre-existing icon — prepend one now.
+      const existing = row.querySelector('.rule-check-icon');
+      if (existing) {
+        existing.outerHTML = iconSvg;
+      } else {
+        row.insertAdjacentHTML('afterbegin', iconSvg);
+      }
+      if (!pass) {
+        row.classList.add('failed');
+        row.classList.add(ruleSeverity === 'blocker' ? 'fail-blocker' : 'fail-warning-row');
+        row.setAttribute('data-fail-section', ruleSectionMap[idx].section);
+        // Append collapsible details panel (hidden by default)
+        const d = failureDetails[idx] || { why: 'Rule could not be satisfied.', element: 'Email content' };
+        row.insertAdjacentHTML('beforeend', `
+          <div class="fail-details-panel" data-panel-for="${idx}">
+            <div class="fail-detail-row">
+              <span class="fail-detail-label">Why it failed</span>
+              <span class="fail-detail-value">${d.why}</span>
+            </div>
+            <div class="fail-detail-row">
+              <span class="fail-detail-label">Element</span>
+              <span class="fail-detail-value">
+                ${d.element}
+                <button class="fail-detail-viewbtn" onclick="event.stopPropagation(); highlightSection(${idx});">
+                  View in email
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h7v7"/><path d="M13 3L6.5 9.5"/><path d="M11.5 11.5V13H3V4.5H5"/></svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        `);
+        // Show caret hint on the row
+        if (!row.querySelector('.fail-caret')) {
+          row.insertAdjacentHTML('beforeend', `<svg class="fail-caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 6 8 10 12 6"/></svg>`);
+        }
+        row.onclick = () => toggleFailDetails(idx);
+      }
+      const nameEl = row.querySelector('.rule-check-name');
+      if (nameEl && !nameEl.querySelector('.rule-check-detail')) {
+        nameEl.insertAdjacentHTML('beforeend', `<div class="rule-check-detail">${pass ? 'Passed — rule satisfied' : 'Failed — issue detected'}</div>`);
+      }
+    }
+    k++;
+  }, 180);
+}
+
+let lastTestResults = [];
+
+function applyEmailHighlights(results) {
+  lastTestResults = results;
+  const thumbContainer = document.getElementById('email-thumb-container');
+  if (!thumbContainer) return;
+
+  results.forEach((pass, idx) => {
+    if (pass) return;
+    const mapping = ruleSectionMap[idx];
+    const sectionEl = thumbContainer.querySelector(`[data-section="${mapping.section}"]`);
+    if (!sectionEl) return;
+
+    const isBlocker = sampleRules[idx] && sampleRules[idx].severity === 'blocker';
+    const highlightClass = isBlocker ? 'error-highlight' : 'warning-highlight';
+    const severityClass = isBlocker ? 'severity-blocker' : 'severity-suggestion';
+
+    if (mapping.type === 'visible') {
+      sectionEl.classList.add(highlightClass);
+    } else if (mapping.type === 'missing') {
+      if (!thumbContainer.querySelector(`.missing-callout[data-for="${mapping.section}"]`)) {
+        const callout = document.createElement('div');
+        callout.className = 'missing-callout ' + severityClass;
+        callout.setAttribute('data-for', mapping.section);
+        callout.setAttribute('data-section', mapping.section + '-missing');
+        callout.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg> ${mapping.label}`;
+        sectionEl.parentNode.insertBefore(callout, sectionEl.nextSibling);
+      }
+    }
+  });
+}
+
+function toggleFailDetails(ruleIdx) {
+  const list = document.getElementById('rules-check-list');
+  if (!list) return;
+  const targetRow = list.querySelector(`.rule-check-row[data-rule-check="${ruleIdx}"]`);
+  if (!targetRow) return;
+  const willOpen = !targetRow.classList.contains('expanded');
+  // Accordion — close any other open details
+  list.querySelectorAll('.rule-check-row.expanded').forEach(r => r.classList.remove('expanded'));
+  if (willOpen) {
+    targetRow.classList.add('expanded');
+    highlightSection(ruleIdx);
+  }
+}
+
+function highlightSection(ruleIdx) {
+  const mapping = ruleSectionMap[ruleIdx];
+  const thumbContainer = document.getElementById('email-thumb-container');
+  const leftCol = document.querySelector('.test-col-left');
+  if (!thumbContainer || !leftCol) return;
+
+  let target;
+  if (mapping.type === 'missing') {
+    target = thumbContainer.querySelector(`.missing-callout[data-for="${mapping.section}"]`);
+  } else {
+    target = thumbContainer.querySelector(`[data-section="${mapping.section}"]`);
+  }
+  if (!target) return;
+
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  target.classList.remove('pulse');
+  void target.offsetWidth;
+  target.classList.add('pulse');
+  setTimeout(() => target.classList.remove('pulse'), 700);
+}
+
+function setSeverity(el, type) {
+  const toggle = el.parentElement;
+  toggle.querySelectorAll('.severity-opt').forEach(o => o.classList.remove('sev-blocker','sev-suggestion'));
+  el.classList.add(type === 'blocker' ? 'sev-blocker' : 'sev-suggestion');
+  updateSeverityCounts();
+}
+
+function updateSeverityCounts() {
+  const b = document.querySelectorAll('.sev-blocker').length;
+  const s = document.querySelectorAll('.sev-suggestion').length;
+  const bEl = document.getElementById('sev-blocker-count');
+  const sEl = document.getElementById('sev-suggestion-count');
+  if (bEl) bEl.textContent = b;
+  if (sEl) sEl.textContent = s;
+}
+
+/* ---------- STEP 5: Confirm & Activate ---------- */
+function renderStep5_confirm(body, footer) {
+  const blockers = sampleRules.filter(r => r.severity === 'blocker').length;
+  const suggestions = sampleRules.filter(r => r.severity === 'suggestion').length;
+
+  const rulesTableRows = sampleRules.map(r => `
+    <tr>
+      <td style="font-weight:500;">${r.name}</td>
+      <td><span class="rule-type-badge ${r.type==='ai'?'rule-ai':'rule-manual'}">${r.type==='ai'?'AI':'Manual'}</span></td>
+      <td>
+        <span class="badge ${r.severity==='blocker'?'badge-blocker':'badge-suggestion'}">${r.severity==='blocker'?'Blocker':'Suggestion'}</span>
+      </td>
+    </tr>
+  `).join('');
+
+  const displayName = (savedChecklistName && savedChecklistName.trim()) || 'Untitled checklist';
+  body.innerHTML = `<div class="fade-content">
+    <div class="confirm-section">
+      <div class="confirm-label">Checklist name</div>
+      <div class="confirm-value">${escapeHtml(displayName)}</div>
+    </div>
+    <div class="confirm-section">
+      <div class="confirm-label">Library</div>
+      <div class="confirm-value">${escapeHtml(getSelectedLibrary())}</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:var(--sp-xl); margin-bottom:var(--sp-lg); margin-top:var(--sp-xl);">
+      <span style="font-size:13px; color:var(--ivory-500);"><strong style="color:var(--ivory-700);">${sampleRules.length}</strong> rules configured</span>
+      <div class="severity-summary-inline">
+        <span><strong class="blocker-count">${blockers}</strong> Blockers</span>
+        <span><strong class="suggestion-count">${suggestions}</strong> Suggestions</span>
+      </div>
+    </div>
+    <table class="rules-table">
+      <thead><tr><th>Rule name</th><th>Type</th><th style="width:180px;">Severity</th></tr></thead>
+      <tbody>${rulesTableRows}</tbody>
+    </table>
+  </div>`;
+
+  footer.innerHTML = `
+    <button class="btn btn-secondary" onclick="goBack()">Back</button>
+    <button class="btn btn-primary" onclick="activateChecklist()">${isEditMode ? 'Update Checklist' : 'Activate Checklist'}</button>
+  `;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function goNext() { if (currentStep < totalSteps) { currentStep++; renderStep(); } }
+function goBack() { if (currentStep > 1) { currentStep--; renderStep(); } }
+
+function buildChecklistRow(rowId) {
+  const row = document.createElement('tr');
+  row.setAttribute('data-checklist-row', String(rowId));
+  row.innerHTML = `
+    <td class="col-name" style="font-weight:600; color: var(--ivory-800);"></td>
+    <td class="col-library"></td>
+    <td class="col-rules" style="white-space:nowrap;"></td>
+    <td><span class="badge badge-active">Active</span></td>
+    <td class="col-modified">Just now</td>
+    <td>
+      <div class="more-menu-wrap">
+        <button class="more-btn" onclick="toggleListMenu(event, this)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+        </button>
+        <div class="context-menu">
+          <button class="context-menu-item" onclick="editChecklist(this); closeAllListMenus();">Edit</button>
+          <button class="context-menu-item destructive" onclick="deleteChecklist(this); closeAllListMenus();">Delete</button>
+        </div>
+      </div>
+    </td>`;
+  return row;
+}
+
+function writeChecklistRow(row, name, library, ruleCount) {
+  const tds = row.children;
+  if (tds[0]) tds[0].textContent = name;
+  if (tds[1]) tds[1].textContent = library;
+  if (tds[2]) tds[2].textContent = `${ruleCount} ${ruleCount === 1 ? 'rule' : 'rules'}`;
+  if (tds[4]) tds[4].textContent = 'Just now';
+}
+
+function activateChecklist() {
+  const displayName = (savedChecklistName && savedChecklistName.trim()) || 'Untitled checklist';
+  const displayLibrary = getSelectedLibrary();
+  const ruleCount = sampleRules.length;
+
+  const tbody = document.getElementById('checklist-tbody');
+  if (tbody) {
+    if (isEditMode && editingRowId !== null) {
+      // Update the row the user opened for editing
+      const row = tbody.querySelector(`tr[data-checklist-row="${editingRowId}"]`);
+      if (row) writeChecklistRow(row, displayName, displayLibrary, ruleCount);
+    } else {
+      // Create mode — always append a NEW row so users can have multiple checklists
+      const rowId = checklistRowSeq++;
+      const row = buildChecklistRow(rowId);
+      tbody.appendChild(row);
+      writeChecklistRow(row, displayName, displayLibrary, ruleCount);
+    }
+  }
+
+  closeModal();
+  document.getElementById('screen-empty').classList.add('hidden');
+  document.getElementById('screen-list').classList.remove('hidden');
+  document.getElementById('checklist-create-icon-btn').style.display = '';
+  // Make sure the Checklists card is visible and expanded so the user can see the new row
+  isComplianceSectionExpanded = true;
+  const card = document.getElementById('checklists-card');
+  if (card) card.classList.add('expanded');
+  renderComplianceModules();
+
+  const toast = document.getElementById('toast');
+  toast.querySelector('span').textContent = isEditMode
+    ? 'Checklist updated successfully'
+    : 'Checklist activated successfully';
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3500);
+
+  // Reset edit pointer now that the save has been committed
+  editingRowId = null;
+}
+
+/* ============================================================
+   LIST VIEW — 3-DOT MENU
+   ============================================================ */
+function toggleListMenu(e, btn) {
+  e.stopPropagation();
+  const menu = btn.nextElementSibling;
+  const wasOpen = menu.classList.contains('open');
+  closeAllListMenus();
+  if (!wasOpen) menu.classList.add('open');
+}
+function closeAllListMenus() {
+  document.querySelectorAll('#checklist-tbody .context-menu.open').forEach(m => m.classList.remove('open'));
+}
+document.addEventListener('click', closeAllListMenus);
+
+function editChecklist(triggerEl) {
+  isEditMode = true;
+  fileUploaded = true;
+  currentStep = 1;
+
+  // Figure out which row the user clicked Edit on.
+  const row = triggerEl ? triggerEl.closest('tr[data-checklist-row]') : null;
+  editingRowId = row ? row.getAttribute('data-checklist-row') : null;
+
+  // Seed the editor from that row so the user's previous inputs are
+  // preserved across edits.
+  const rowName = row && row.children[0] ? row.children[0].textContent.trim() : '';
+  const rowLibrary = row && row.children[1] ? row.children[1].textContent.trim() : '';
+
+  savedChecklistName = rowName || savedChecklistName || 'Brand Compliance — Email Standards';
+
+  // Map the library text back into selectedLibraries (values), supporting
+  // "All libraries", comma-separated labels, or a single label.
+  if (rowLibrary === 'All libraries') {
+    selectedLibraries = libraryOptions.map(o => o.value);
+  } else if (rowLibrary && rowLibrary !== 'Not selected') {
+    const labels = rowLibrary.split(',').map(s => s.trim());
+    selectedLibraries = libraryOptions
+      .filter(o => labels.includes(o.label))
+      .map(o => o.value);
+    if (selectedLibraries.length === 0) selectedLibraries = ['master-brand'];
+  } else {
+    selectedLibraries = ['master-brand'];
+  }
+
+  document.getElementById('modal-overlay').classList.add('visible');
+  renderStep();
+  setTimeout(() => {
+    const nameInput = document.getElementById('checklist-name');
+    if (nameInput) nameInput.value = savedChecklistName;
+    renderLibChips();
+    renderLibDropdownOptions();
+    validateStep1();
+    document.getElementById('modal-title').textContent = 'Edit Checklist';
+  }, 50);
+}
+
+function deleteChecklist(btn) {
+  const row = btn.closest('tr');
+  if (row) {
+    row.style.transition = 'opacity 0.2s ease';
+    row.style.opacity = '0';
+    setTimeout(() => {
+      row.remove();
+      const tbody = document.getElementById('checklist-tbody');
+      if (tbody && tbody.children.length === 0) {
+        document.getElementById('screen-list').classList.add('hidden');
+        document.getElementById('screen-empty').classList.remove('hidden');
+        document.getElementById('checklist-create-icon-btn').style.display = 'none';
+      }
+      renderComplianceModules();
+    }, 200);
+  }
+}
+</script>
+</body>
+</html>
